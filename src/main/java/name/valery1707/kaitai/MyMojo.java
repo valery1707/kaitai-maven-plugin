@@ -33,52 +33,40 @@ import java.io.IOException;
  *
  * @deprecated Don't use!
  */
-@Mojo( name = "touch", defaultPhase = LifecyclePhase.PROCESS_SOURCES )
-public class MyMojo
-    extends AbstractMojo
-{
-    /**
-     * Location of the file.
-     */
-    @Parameter( defaultValue = "${project.build.directory}", property = "outputDir", required = true )
-    private File outputDirectory;
+@Mojo(name = "touch", defaultPhase = LifecyclePhase.PROCESS_SOURCES)
+public class MyMojo extends AbstractMojo {
 
-    public void execute()
-        throws MojoExecutionException
-    {
-        File f = outputDirectory;
+	/**
+	 * Location of the file.
+	 */
+	@Parameter(defaultValue = "${project.build.directory}", property = "outputDir", required = true)
+	private File outputDirectory;
 
-        if ( !f.exists() )
-        {
-            f.mkdirs();
-        }
+	public void execute()
+		throws MojoExecutionException {
+		File f = outputDirectory;
 
-        File touch = new File( f, "touch.txt" );
+		if (!f.exists()) {
+			f.mkdirs();
+		}
 
-        FileWriter w = null;
-        try
-        {
-            w = new FileWriter( touch );
+		File touch = new File(f, "touch.txt");
 
-            w.write( "touch.txt" );
-        }
-        catch ( IOException e )
-        {
-            throw new MojoExecutionException( "Error creating file " + touch, e );
-        }
-        finally
-        {
-            if ( w != null )
-            {
-                try
-                {
-                    w.close();
-                }
-                catch ( IOException e )
-                {
-                    // ignore
-                }
-            }
-        }
-    }
+		FileWriter w = null;
+		try {
+			w = new FileWriter(touch);
+
+			w.write("touch.txt");
+		} catch (IOException e) {
+			throw new MojoExecutionException("Error creating file " + touch, e);
+		} finally {
+			if (w != null) {
+				try {
+					w.close();
+				} catch (IOException e) {
+					// ignore
+				}
+			}
+		}
+	}
 }
