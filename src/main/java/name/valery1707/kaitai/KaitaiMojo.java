@@ -1,5 +1,7 @@
 package name.valery1707.kaitai;
 
+import name.valery1707.download.ProgressListener;
+import name.valery1707.download.ProgressMeta;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -17,8 +19,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
 
-import static name.valery1707.kaitai.MojoUtils.mkdirs;
-import static name.valery1707.kaitai.MojoUtils.scanFiles;
+import static name.valery1707.kaitai.MojoUtils.*;
 
 /**
  * @see <a href="http://maven.apache.org/developers/mojo-api-specification.html">Mojo API Specification</a>
@@ -143,9 +144,24 @@ public class KaitaiMojo extends AbstractMojo {
 		mkdirs(cacheDir);
 
 		//todo Download Kaitai distribution into cache and unzip it
+		Path kaitaiDistZip = cacheDir.toPath().resolve(url.getFile());
+		Path kaitaiDist = downloadAndExtract(url, kaitaiDistZip);
+		Path kaitaiJar;
 
 		mkdirs(output);
 		//todo Generate Java sources
 		//todo Add generated directory into Maven's build scope
+		project.addCompileSourceRoot(output.getAbsolutePath());
+	}
+
+	private Path downloadAndExtract(URL url, Path zip) throws MojoExecutionException {
+		download(url, zip, new ProgressListener() {
+			@Override
+			public void progress(ProgressMeta meta) {
+				getLog().info("");
+			}
+		});
+		return zip;
+//		return unpack(zip);
 	}
 }
