@@ -15,6 +15,10 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.List;
+
+import static name.valery1707.kaitai.MojoUtils.mkdirs;
+import static name.valery1707.kaitai.MojoUtils.scanFiles;
 
 /**
  * @see <a href="http://maven.apache.org/developers/mojo-api-specification.html">Mojo API Specification</a>
@@ -27,37 +31,53 @@ public class KaitaiMojo extends AbstractMojo {
 	private static final String URL_FORMAT = "https://dl.bintray.com/kaitai-io/universal/%s/kaitai-struct-compiler-%s.zip";
 
 	/**
+	 * Version of <a href="http://kaitai.io/#download">KaiTai</a> library.
+	 *
 	 * @since 0.1.0
 	 */
 	@Parameter(property = "kaitai.version", defaultValue = "0.8")
 	private String version;
 
 	/**
+	 * Direct link onto <a href="http://kaitai.io/#download">KaiTai universal zip archive</a>.
+	 *
 	 * @since 0.1.0
 	 */
 	@Parameter(property = "kaitai.url")
 	private URL url;
 
 	/**
+	 * Cache directory for download KaiTai library.
+	 *
+	 * @see KaitaiMojo#version
+	 * @see KaitaiMojo#url
 	 * @since 0.1.0
 	 */
 	@Parameter(property = "kaitai.cache")
 	private File cacheDir;
 
 	/**
+	 * Source directory with <a href="http://formats.kaitai.io/">Kaitai Struct language</a> files.
+	 *
 	 * @since 0.1.0
 	 */
-	@Parameter(property = "kaitai.source", defaultValue = "${project.build.sourceDirectory}//kaitai")
+	@Parameter(property = "kaitai.source", defaultValue = "${project.build.sourceDirectory}/resources/kaitai")
 	private File sourceDirectory;
 
 	/**
+	 * Include wildcard pattern list.
+	 *
 	 * @since 0.1.0
 	 */
+	@Parameter(property = "kaitai.includes", defaultValue = "*.ksy")
 	private String[] includes;
 
 	/**
+	 * Exclude wildcard pattern list.
+	 *
 	 * @since 0.1.0
 	 */
+	@Parameter(property = "kaitai.excludes")
 	private String[] excludes;
 
 	/**
@@ -101,13 +121,16 @@ public class KaitaiMojo extends AbstractMojo {
 			return;
 		}
 
-		//todo Scan source files
-
-		//todo Add generated directory into Maven's build scope
+		//Scan source files
+		List<File> source = scanFiles(sourceDirectory, includes, excludes);
+		if (source.isEmpty()) {
+			getLog().warn("Not found any input files: skip generation step");
+			return;
+		}
 
 		if (url == null) {
 			try {
-				url = new URL(String.format(URL_FORMAT, version));
+				url = new URL(String.format(URL_FORMAT, version, version));
 			} catch (MalformedURLException e) {
 				throw new MojoExecutionException("Invalid version: " + version, e);
 			}
@@ -116,20 +139,13 @@ public class KaitaiMojo extends AbstractMojo {
 		if (cacheDir == null) {
 			Path repository = new File(session.getLocalRepository().getBasedir()).toPath();
 			cacheDir = repository.resolve(".cache").resolve("kaitai").normalize().toFile();
-			if (!cacheDir.exists()) {
-				if (!cacheDir.mkdir()) {
-					throw new MojoExecutionException("Fail to create cache directory: " + cacheDir.getAbsolutePath());
-				}
-			}
 		}
-		if (!cacheDir.isDirectory() || !cacheDir.canWrite()) {
-			throw new MojoExecutionException("Fail to use cache directory: " + cacheDir.getAbsolutePath());
-		}
+		mkdirs(cacheDir);
 
 		//todo Download Kaitai distribution into cache and unzip it
 
-		//todo Check for exists files
-
+		mkdirs(output);
 		//todo Generate Java sources
+		//todo Add generated directory into Maven's build scope
 	}
 }
