@@ -22,6 +22,7 @@ import java.util.zip.ZipInputStream;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static org.apache.commons.lang3.StringUtils.removeStart;
 
 public final class MojoUtils {
 	private MojoUtils() {
@@ -120,5 +121,40 @@ public final class MojoUtils {
 			);
 		}
 		move(temp, target);
+	}
+
+	public static Path unpack(Path zip) throws MojoExecutionException {
+		String filename = zip.getFileName().toString();
+		String extension = FilenameUtils.getExtension(filename);
+		Path dir = zip.resolveSibling(filename.replace("." + extension, ""));
+		if (Files.isDirectory(dir)) {
+			return dir;
+		}
+		Path temp = dir.resolveSibling(dir.getFileName().toString() + "-tmp");
+		delete(temp);
+		try (
+			InputStream is = Files.newInputStream(zip);
+			ZipInputStream zis = new ZipInputStream(is);
+		) {
+			Files.createDirectory(temp);
+			ZipEntry entry;
+			while ((entry = zis.getNextEntry()) != null) {
+				if (entry.isDirectory()) {
+					continue;
+				}
+				Path current = temp.resolve(removeStart(entry.getName(), "/"));
+				Files.createDirectories(current.getParent());
+				Files.copy(zis, current, StandardCopyOption.REPLACE_EXISTING);
+			}
+		} catch (IOException e) {
+			throw new MojoExecutionException(format(
+				"Fail to extract content of '%s'"
+				, zip.normalize().toFile().getAbsolutePath()
+			)
+				, e
+			);
+		}
+		move(temp, dir);
+		return dir;
 	}
 }

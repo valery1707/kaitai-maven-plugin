@@ -161,7 +161,6 @@ public class KaitaiMojo extends AbstractMojo {
 				getLog().info("");
 			}
 		});
-		return zip;
-//		return unpack(zip);
+		return unpack(zip);
 	}
 }
