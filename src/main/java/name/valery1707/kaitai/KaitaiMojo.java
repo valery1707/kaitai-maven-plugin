@@ -121,7 +121,7 @@ public class KaitaiMojo extends AbstractMojo {
 		}
 
 		//Scan source files
-		List<File> source = scanFiles(sourceDirectory, includes, excludes);
+		List<Path> source = scanFiles(sourceDirectory.toPath(), includes, excludes);
 		if (source.isEmpty()) {
 			getLog().warn("Not found any input files: skip generation step");
 			return;

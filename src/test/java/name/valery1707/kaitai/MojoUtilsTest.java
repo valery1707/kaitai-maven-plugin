@@ -8,18 +8,17 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import javax.xml.bind.DatatypeConverter;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -39,6 +38,24 @@ public class MojoUtilsTest {
 
 	private Path copy(String resource) throws IOException {
 		return copy(resource, temporaryFolder.newFolder().toPath().resolve(getName(resource)));
+	}
+
+	@Test
+	public void testScanFiles() throws MojoExecutionException {
+		List<Path> files = MojoUtils.scanFiles(new File(".").toPath(), new String[]{"*.java"}, new String[]{"My*.java", "*Test.java"});
+		assertThat(files)
+			.isNotEmpty()
+			.contains(
+				new File(".").toPath().resolve("src/main/java/name/valery1707/kaitai/KaitaiMojo.java").normalize().toAbsolutePath()
+			)
+			.doesNotContain(
+				new File(".").toPath().resolve("src/main/java/name/valery1707/kaitai/KaitaiMojo.java"),
+				new File(".").toPath().resolve("src/main/java/name/valery1707/kaitai/KaitaiMojo.java").toAbsolutePath(),
+				new File(".").toPath().resolve("src/main/java/name/valery1707/kaitai/KaitaiMojo.java").normalize(),
+				new File(".").toPath().resolve("src/main/java/name/valery1707/kaitai/MyMojo.java"),
+				new File(".").toPath().resolve("src/test/java/name/valery1707/kaitai/MojoUtilsTest.java")
+			)
+		;
 	}
 
 	@Test
