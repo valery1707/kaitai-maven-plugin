@@ -1,7 +1,5 @@
 package name.valery1707.kaitai;
 
-import name.valery1707.download.ProgressListener;
-import name.valery1707.download.ProgressMeta;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -155,12 +153,7 @@ public class KaitaiMojo extends AbstractMojo {
 	}
 
 	private Path downloadAndExtract(URL url, Path zip) throws MojoExecutionException {
-		download(url, zip, new ProgressListener() {
-			@Override
-			public void progress(ProgressMeta meta) {
-				getLog().info("");
-			}
-		});
+		download(url, zip);
 		return unpack(zip);
 	}
 }

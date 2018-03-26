@@ -1,20 +1,17 @@
 package name.valery1707.kaitai;
 
-import name.valery1707.download.ProgressListener;
-import name.valery1707.download.manager.StandardDownloadManager;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.maven.plugin.MojoExecutionException;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -102,20 +99,22 @@ public final class MojoUtils {
 		}
 	}
 
-	public static void download(URL source, Path target, ProgressListener progressListener) throws MojoExecutionException {
+	public static void download(URL source, Path target) throws MojoExecutionException {
 		if (Files.exists(target)) {
 			return;
 		}
 		Path temp = target.resolveSibling(target.getFileName().toString() + ".tmp");
 		delete(temp);
-		try {
-			StandardDownloadManager.builder()
-				.build()
-				.download(source, temp, progressListener);
+		try (
+			InputStream is = source.openStream();
+			OutputStream os = Files.newOutputStream(temp, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
+		) {
+			IOUtils.copy(is, os);
 		} catch (IOException e) {
 			throw new MojoExecutionException(format(
 				"Fail to download '%s' into '%s'"
-				, source, temp.normalize().toFile().getAbsolutePath()
+				, source
+				, temp.normalize().toFile().getAbsolutePath()
 			)
 				, e
 			);

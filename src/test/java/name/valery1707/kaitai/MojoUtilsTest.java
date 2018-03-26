@@ -1,16 +1,25 @@
 package name.valery1707.kaitai;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.NullOutputStream;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.security.DigestOutputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -76,5 +85,47 @@ public class MojoUtilsTest {
 		//Valid directory inside our directory
 		assertThat(target.resolve("bin")).exists().isDirectory();
 		assertThat(target.resolve("bin/bash")).exists().isRegularFile();
+	}
+
+	@Test
+	public void testDownload_success() throws IOException, MojoExecutionException, NoSuchAlgorithmException {
+		Path target = temporaryFolder.newFile("assertj-core-2.9.0.jar").toPath();
+		Files.delete(target);
+		URL source = new URL("https://search.maven.org/remotecontent?filepath=org/assertj/assertj-core/2.9.0/assertj-core-2.9.0.jar");
+		MojoUtils.download(source, target);
+		assertThat(target).exists().isRegularFile().isReadable();
+
+		MessageDigest digest = MessageDigest.getInstance("SHA1");
+		Files.copy(target, new DigestOutputStream(new NullOutputStream(), digest));
+		String hashActual = DatatypeConverter.printHexBinary(digest.digest());
+
+		try (
+			InputStream shaExpected = new URL(source.toExternalForm() + ".sha1").openStream();
+		) {
+			for (String hashExpected : IOUtils.readLines(shaExpected, StandardCharsets.UTF_8)) {
+				assertThat(hashActual).isEqualToIgnoringCase(hashExpected);
+			}
+		}
+	}
+
+	@Test
+	public void testDownload_noDownloadIfExists() throws IOException, MojoExecutionException {
+		Path target = temporaryFolder.newFile("assertj-core-2.9.0.jar").toPath();
+		URL source = new URL("https://search.maven.org/remotecontent?filepath=org/assertj/assertj-core/2.9.0/assertj-core-2.9.0.jar");
+		MojoUtils.download(source, target);
+		assertThat(target)
+			.exists()
+			.isRegularFile()
+			.isReadable()
+			.hasBinaryContent(new byte[0]);
+	}
+
+	@Test(expected = MojoExecutionException.class)
+	public void testDownload_404() throws IOException, MojoExecutionException {
+		Path target = temporaryFolder.newFile("assertj-core-2.9.0.jar").toPath();
+		Files.delete(target);
+		URL source = new URL("https://search.maven.org/remotecontent?filepath=org/assertj/assertj-core/2.7.0/assertj-core-2.9.0.jar");
+		MojoUtils.download(source, target);
+		throw new IllegalStateException("Unreachable statement");
 	}
 }
