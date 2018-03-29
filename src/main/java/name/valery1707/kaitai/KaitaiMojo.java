@@ -15,10 +15,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.lang.String.format;
 import static name.valery1707.kaitai.MojoUtils.*;
@@ -65,7 +62,7 @@ public class KaitaiMojo extends AbstractMojo {
 	 *
 	 * @since 0.1.0
 	 */
-	@Parameter(property = "kaitai.source", defaultValue = "${project.build.sourceDirectory}/resources/kaitai")
+	@Parameter(property = "kaitai.source", defaultValue = "${project.build.sourceDirectory}/../resources/kaitai")
 	private File sourceDirectory;
 
 	/**
@@ -129,7 +126,7 @@ public class KaitaiMojo extends AbstractMojo {
 		//Scan source files
 		if (!sourceDirectory.exists()) {
 			getLog().warn(format(
-				"Skip KaiTai generation: Source directory '%s' does not exists "
+				"Skip KaiTai generation: Source directory does not exists: %s"
 				, sourceDirectory.toPath().normalize().toFile().getAbsolutePath()
 			));
 			return;
@@ -137,7 +134,9 @@ public class KaitaiMojo extends AbstractMojo {
 		List<Path> source = scanFiles(sourceDirectory.toPath(), includes, excludes);
 		if (source.isEmpty()) {
 			getLog().warn(format(
-				"Skip KaiTai generation: Not found any input files source directory '%s'"
+				"Skip KaiTai generation: Source directory does not contain KaiTai templates (include: %s; exclude: %s): %s"
+				, Arrays.toString(includes)
+				, Arrays.toString(excludes)
 				, sourceDirectory.toPath().normalize().toFile().getAbsolutePath()
 			));
 			return;
