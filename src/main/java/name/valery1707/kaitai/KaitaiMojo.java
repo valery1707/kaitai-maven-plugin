@@ -92,6 +92,14 @@ public class KaitaiMojo extends AbstractMojo {
 	private File output;
 
 	/**
+	 * Target package for generated Java source files.
+	 *
+	 * @since 0.1.0
+	 */
+	@Parameter(property = "kaitai.package", defaultValue = "${project.groupId}")
+	private String packageName;
+
+	/**
 	 * Skip plugin execution (don't read/validate any files, don't generate any java types).
 	 *
 	 * @since 0.1.0
@@ -144,17 +152,29 @@ public class KaitaiMojo extends AbstractMojo {
 			return;
 		}
 
-		URL url = prepareUrl(this.url, version);
-
-		Path cacheDir = prepareCache(this.cacheDir, session, getLog());
-
 		//Download Kaitai distribution into cache and unzip it
-		Path kaitaiScript = downloadKaitai(url, cacheDir, getLog());
+		URL url = prepareUrl(this.url, version);
+		Path cacheDir = prepareCache(this.cacheDir, session, getLog());
+		Path kaitai = downloadKaitai(url, cacheDir, getLog());
 
+		//Generate Java sources
 		Path output = mkdirs(this.output.toPath());
-		//todo Generate Java sources
-		//todo Add generated directory into Maven's build scope
-		project.addCompileSourceRoot(output.normalize().toFile().getAbsolutePath());
+		Path generatedRoot;
+		try {
+			generatedRoot = KaitaiGenerator
+				.generator(kaitai, output, packageName)
+				.withSource(source)
+				.overwrite(overwrite)
+				.generate(getLog());
+		} catch (KaitaiException e) {
+			throw new MojoExecutionException(
+				"Fail to generate Java files"
+				, e
+			);
+		}
+
+		//Add generated directory into Maven's build scope
+		project.addCompileSourceRoot(generatedRoot.normalize().toFile().getAbsolutePath());
 	}
 
 	static URL prepareUrl(URL url, String version) throws MojoExecutionException {

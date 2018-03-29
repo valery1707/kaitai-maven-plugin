@@ -26,6 +26,15 @@ public final class MojoUtils {
 	private MojoUtils() {
 	}
 
+	public static void checkFileIsReadable(Path target) throws MojoExecutionException {
+		if (!Files.isRegularFile(target) || !Files.isReadable(target)) {
+			throw new MojoExecutionException(format(
+				"Fail to read file: %s"
+				, target.normalize().toFile().getAbsolutePath()
+			));
+		}
+	}
+
 	public static void checkDirectoryIsReadable(Path target) throws MojoExecutionException {
 		if (!Files.isDirectory(target) || !Files.isReadable(target)) {
 			throw new MojoExecutionException(format(
