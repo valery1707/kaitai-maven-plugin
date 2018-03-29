@@ -1,5 +1,6 @@
 package name.valery1707.kaitai;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
@@ -183,7 +184,7 @@ public class KaitaiMojo extends AbstractMojo {
 	}});
 
 	static Path downloadKaitai(URL url, Path cacheDir) throws MojoExecutionException {
-		Path distZip = cacheDir.resolve(url.getFile());
+		Path distZip = cacheDir.resolve(FilenameUtils.getName(url.getFile()));
 		download(url, distZip);
 		Path dist = unpack(distZip);
 		List<Path> bats = scanFiles(dist, new String[]{KAITAI_START_SCRIPT}, new String[0]);
