@@ -1,5 +1,6 @@
 package name.valery1707.kaitai;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -14,7 +15,10 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java.lang.String.format;
 import static name.valery1707.kaitai.MojoUtils.*;
@@ -137,7 +141,7 @@ public class KaitaiMojo extends AbstractMojo {
 		Path cacheDir = prepareCache(this.cacheDir, session);
 
 		//Download Kaitai distribution into cache and unzip it
-		Path kaitaiBat = downloadKaitai(url, cacheDir);
+		Path kaitaiScript = downloadKaitai(url, cacheDir);
 
 		Path output = mkdirs(this.output.toPath());
 		//todo Generate Java sources
@@ -167,6 +171,11 @@ public class KaitaiMojo extends AbstractMojo {
 		return mkdirs(cache);
 	}
 
+	private static final Map<Boolean, String> SCRIPT_SUFFIX_REMOVER = Collections.unmodifiableMap(new HashMap<Boolean, String>() {{
+		put(true, "");
+		put(false, ".bat");
+	}});
+
 	static Path downloadKaitai(URL url, Path cacheDir) throws MojoExecutionException {
 		Path distZip = cacheDir.resolve(url.getFile());
 		download(url, distZip);
@@ -179,6 +188,8 @@ public class KaitaiMojo extends AbstractMojo {
 				, dist.normalize().toFile().getAbsolutePath()
 			));
 		}
-		return bats.get(0);
+		Path bat = bats.get(0);
+		String suffixToRemove = SCRIPT_SUFFIX_REMOVER.get(SystemUtils.IS_OS_WINDOWS);
+		return bat.resolveSibling(bat.getFileName().toString().replace(suffixToRemove, ""));
 	}
 }
