@@ -127,12 +127,19 @@ public class KaitaiMojo extends AbstractMojo {
 		}
 
 		//Scan source files
+		if (!sourceDirectory.exists()) {
+			getLog().warn(format(
+				"Skip KaiTai generation: Source directory '%s' does not exists "
+				, sourceDirectory.toPath().normalize().toFile().getAbsolutePath()
+			));
+			return;
+		}
 		List<Path> source = scanFiles(sourceDirectory.toPath(), includes, excludes);
 		if (source.isEmpty()) {
-			getLog().warn(
-				"Skip KaiTai generation: Not found any input files in "
-					+ sourceDirectory.toPath().normalize().toFile().getAbsolutePath()
-			);
+			getLog().warn(format(
+				"Skip KaiTai generation: Not found any input files source directory '%s'"
+				, sourceDirectory.toPath().normalize().toFile().getAbsolutePath()
+			));
 			return;
 		}
 
