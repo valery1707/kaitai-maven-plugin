@@ -3,6 +3,7 @@ package name.valery1707.kaitai;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -14,7 +15,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -27,6 +31,8 @@ import static org.apache.commons.io.FilenameUtils.getName;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class MojoUtilsTest {
+	private static final SystemStreamLog LOG = new SystemStreamLog();
+
 	@Rule
 	public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
@@ -61,7 +67,7 @@ public class MojoUtilsTest {
 	@Test
 	public void testUnpack() throws IOException, MojoExecutionException {
 		Path zip = copy("/demo-vertx.zip");
-		Path target = MojoUtils.unpack(zip);
+		Path target = MojoUtils.unpack(zip, LOG);
 		assertThat(target).exists().isDirectory();
 		assertThat(target.resolve("demo-vertx")).exists().isDirectory();
 		assertThat(target.resolve("demo-vertx/pom.xml")).exists().isRegularFile();
@@ -71,7 +77,7 @@ public class MojoUtilsTest {
 	public void testUnpack_exists() throws IOException, MojoExecutionException {
 		Path zip = copy("/demo-vertx.zip");
 		Files.createDirectories(zip.resolveSibling("demo-vertx"));
-		Path target = MojoUtils.unpack(zip);
+		Path target = MojoUtils.unpack(zip, LOG);
 		assertThat(target).exists().isDirectory();
 		assertThat(target.resolve("demo-vertx")).doesNotExist();
 		assertThat(target.resolve("demo-vertx/pom.xml")).doesNotExist();
@@ -93,7 +99,7 @@ public class MojoUtilsTest {
 				).getBytes(UTF_8)
 			);
 		}
-		Path target = MojoUtils.unpack(zip);
+		Path target = MojoUtils.unpack(zip, LOG);
 		assertThat(target).exists().isDirectory();
 
 		//malicious directory at root path
@@ -109,7 +115,7 @@ public class MojoUtilsTest {
 		Path target = temporaryFolder.newFile("assertj-core-2.9.0.jar").toPath();
 		Files.delete(target);
 		URL source = new URL("https://search.maven.org/remotecontent?filepath=org/assertj/assertj-core/2.9.0/assertj-core-2.9.0.jar");
-		MojoUtils.download(source, target);
+		MojoUtils.download(source, target, LOG);
 		assertThat(target).exists().isRegularFile().isReadable();
 
 		MessageDigest digest = MessageDigest.getInstance("SHA1");
@@ -129,7 +135,7 @@ public class MojoUtilsTest {
 	public void testDownload_noDownloadIfExists() throws IOException, MojoExecutionException {
 		Path target = temporaryFolder.newFile("assertj-core-2.9.0.jar").toPath();
 		URL source = new URL("https://search.maven.org/remotecontent?filepath=org/assertj/assertj-core/2.9.0/assertj-core-2.9.0.jar");
-		MojoUtils.download(source, target);
+		MojoUtils.download(source, target, LOG);
 		assertThat(target)
 			.exists()
 			.isRegularFile()
@@ -142,7 +148,7 @@ public class MojoUtilsTest {
 		Path target = temporaryFolder.newFile("assertj-core-2.9.0.jar").toPath();
 		Files.delete(target);
 		URL source = new URL("https://search.maven.org/remotecontent?filepath=org/assertj/assertj-core/2.7.0/assertj-core-2.9.0.jar");
-		MojoUtils.download(source, target);
+		MojoUtils.download(source, target, LOG);
 		throw new IllegalStateException("Unreachable statement");
 	}
 }

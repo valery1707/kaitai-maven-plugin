@@ -1,6 +1,7 @@
 package name.valery1707.kaitai;
 
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
@@ -17,6 +18,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.containsString;
 
 public class KaitaiMojoTest {
+	private static final SystemStreamLog LOG = new SystemStreamLog();
+
 	@Rule
 	public ExpectedException exception = ExpectedException.none();
 
@@ -49,6 +52,6 @@ public class KaitaiMojoTest {
 		exception.expect(MojoExecutionException.class);
 		exception.expectMessage(containsString("Fail to find start script"));
 		Path cache = temporaryFolder.newFolder().toPath();
-		downloadKaitai(getClass().getResource("/demo-vertx.zip"), cache);
+		downloadKaitai(getClass().getResource("/demo-vertx.zip"), cache, LOG);
 	}
 }

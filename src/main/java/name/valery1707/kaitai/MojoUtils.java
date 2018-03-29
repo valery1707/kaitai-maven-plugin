@@ -5,6 +5,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.Log;
 
 import java.io.FileFilter;
 import java.io.IOException;
@@ -110,12 +111,16 @@ public final class MojoUtils {
 		}
 	}
 
-	public static void download(URL source, Path target) throws MojoExecutionException {
+	public static void download(URL source, Path target, Log log) throws MojoExecutionException {
 		if (Files.exists(target)) {
 			return;
 		}
 		Path temp = target.resolveSibling(target.getFileName().toString() + ".tmp");
 		delete(temp);
+		log.info(format(
+			"KaiTai distribution: Downloading: %s"
+			, source
+		));
 		try (
 			InputStream is = source.openStream();
 			OutputStream os = Files.newOutputStream(temp, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
@@ -133,13 +138,17 @@ public final class MojoUtils {
 		move(temp, target);
 	}
 
-	public static Path unpack(Path zip) throws MojoExecutionException {
+	public static Path unpack(Path zip, Log log) throws MojoExecutionException {
 		String filename = zip.getFileName().toString();
 		String extension = FilenameUtils.getExtension(filename);
 		Path dir = zip.resolveSibling(filename.replace("." + extension, ""));
 		if (Files.isDirectory(dir)) {
 			return dir;
 		}
+		log.info(format(
+			"KaiTai distribution: Extracting: %s"
+			, zip.normalize().toFile().getAbsolutePath()
+		));
 		Path temp = dir.resolveSibling(dir.getFileName().toString() + "-tmp");
 		delete(temp);
 		try (

@@ -6,6 +6,7 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -145,10 +146,10 @@ public class KaitaiMojo extends AbstractMojo {
 
 		URL url = prepareUrl(this.url, version);
 
-		Path cacheDir = prepareCache(this.cacheDir, session);
+		Path cacheDir = prepareCache(this.cacheDir, session, getLog());
 
 		//Download Kaitai distribution into cache and unzip it
-		Path kaitaiScript = downloadKaitai(url, cacheDir);
+		Path kaitaiScript = downloadKaitai(url, cacheDir, getLog());
 
 		Path output = mkdirs(this.output.toPath());
 		//todo Generate Java sources
@@ -167,7 +168,7 @@ public class KaitaiMojo extends AbstractMojo {
 		return url;
 	}
 
-	static Path prepareCache(File target, MavenSession session) throws MojoExecutionException {
+	static Path prepareCache(File target, MavenSession session, Log log) throws MojoExecutionException {
 		Path cache;
 		if (target == null) {
 			Path repository = new File(session.getLocalRepository().getBasedir()).toPath();
@@ -175,6 +176,10 @@ public class KaitaiMojo extends AbstractMojo {
 		} else {
 			cache = target.toPath();
 		}
+		log.debug(format(
+			"KaiTai distribution: Prepare cache directory: %s"
+			, cache.normalize().toFile().getAbsolutePath()
+		));
 		return mkdirs(cache);
 	}
 
@@ -183,10 +188,10 @@ public class KaitaiMojo extends AbstractMojo {
 		put(false, ".bat");
 	}});
 
-	static Path downloadKaitai(URL url, Path cacheDir) throws MojoExecutionException {
+	static Path downloadKaitai(URL url, Path cacheDir, Log log) throws MojoExecutionException {
 		Path distZip = cacheDir.resolve(FilenameUtils.getName(url.getFile()));
-		download(url, distZip);
-		Path dist = unpack(distZip);
+		download(url, distZip, log);
+		Path dist = unpack(distZip, log);
 		List<Path> bats = scanFiles(dist, new String[]{KAITAI_START_SCRIPT}, new String[0]);
 		if (bats.size() != 1) {
 			throw new MojoExecutionException(format(
