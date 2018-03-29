@@ -6,7 +6,10 @@ import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.maven.plugin.MojoExecutionException;
 
-import java.io.*;
+import java.io.FileFilter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -51,25 +54,30 @@ public final class MojoUtils {
 		}
 	}
 
-	public static void checkDirectoryIsWritable(File target) throws MojoExecutionException {
-		if (!target.isDirectory() || !target.canWrite()) {
+	public static void checkDirectoryIsWritable(Path target) throws MojoExecutionException {
+		if (!Files.isDirectory(target) || !Files.isWritable(target)) {
 			throw new MojoExecutionException(format(
 				"Fail to write into directory: %s"
-				, target.getAbsolutePath()
+				, target.normalize().toFile().getAbsolutePath()
 			));
 		}
 	}
 
-	public static void mkdirs(File target) throws MojoExecutionException {
-		if (!target.exists()) {
-			if (!target.mkdirs()) {
+	public static Path mkdirs(Path target) throws MojoExecutionException {
+		if (!Files.exists(target)) {
+			try {
+				Files.createDirectories(target);
+			} catch (IOException e) {
 				throw new MojoExecutionException(format(
 					"Fail to create directory: %s"
-					, target.getAbsolutePath()
-				));
+					, target.normalize().toFile().getAbsolutePath()
+				)
+					, e
+				);
 			}
 		}
 		checkDirectoryIsWritable(target);
+		return target;
 	}
 
 	private static void delete(Path path) throws MojoExecutionException {

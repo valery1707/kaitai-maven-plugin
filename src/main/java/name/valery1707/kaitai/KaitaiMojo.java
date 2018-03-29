@@ -4,7 +4,6 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -17,6 +16,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
 
+import static java.lang.String.format;
 import static name.valery1707.kaitai.MojoUtils.*;
 
 /**
@@ -28,6 +28,7 @@ import static name.valery1707.kaitai.MojoUtils.*;
 )
 public class KaitaiMojo extends AbstractMojo {
 	private static final String URL_FORMAT = "https://dl.bintray.com/kaitai-io/universal/%s/kaitai-struct-compiler-%s.zip";
+	private static final String KAITAI_START_SCRIPT = "kaitai-struct-compiler.bat";
 
 	/**
 	 * Version of <a href="http://kaitai.io/#download">KaiTai</a> library.
@@ -103,13 +104,13 @@ public class KaitaiMojo extends AbstractMojo {
 	@Parameter(property = "kaitai.overwrite", defaultValue = "false")
 	private boolean overwrite = false;
 
-	@Component
-	protected Settings settings;
+	@Parameter(defaultValue = "${settings}", readonly = true)
+	private Settings settings;
 
-	@Component
+	@Parameter(defaultValue = "${session}", readonly = true)
 	private MavenSession session;
 
-	@Component
+	@Parameter(defaultValue = "${project}", readonly = true)
 	private MavenProject project;
 
 	/**
@@ -117,43 +118,67 @@ public class KaitaiMojo extends AbstractMojo {
 	 */
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		if (skip) {
+			getLog().info("Skip KaiTai generation: skip=true");
 			return;
 		}
 
 		//Scan source files
 		List<Path> source = scanFiles(sourceDirectory.toPath(), includes, excludes);
 		if (source.isEmpty()) {
-			getLog().warn("Not found any input files: skip generation step");
+			getLog().warn(
+				"Skip KaiTai generation: Not found any input files in "
+					+ sourceDirectory.toPath().normalize().toFile().getAbsolutePath()
+			);
 			return;
 		}
 
+		URL url = prepareUrl(this.url, version);
+
+		Path cacheDir = prepareCache(this.cacheDir, session);
+
+		//Download Kaitai distribution into cache and unzip it
+		Path kaitaiBat = downloadKaitai(url, cacheDir);
+
+		Path output = mkdirs(this.output.toPath());
+		//todo Generate Java sources
+		//todo Add generated directory into Maven's build scope
+		project.addCompileSourceRoot(output.normalize().toFile().getAbsolutePath());
+	}
+
+	static URL prepareUrl(URL url, String version) throws MojoExecutionException {
 		if (url == null) {
 			try {
-				url = new URL(String.format(URL_FORMAT, version, version));
+				url = new URL(format(URL_FORMAT, version, version));
 			} catch (MalformedURLException e) {
 				throw new MojoExecutionException("Invalid version: " + version, e);
 			}
 		}
-
-		if (cacheDir == null) {
-			Path repository = new File(session.getLocalRepository().getBasedir()).toPath();
-			cacheDir = repository.resolve(".cache").resolve("kaitai").normalize().toFile();
-		}
-		mkdirs(cacheDir);
-
-		//todo Download Kaitai distribution into cache and unzip it
-		Path kaitaiDistZip = cacheDir.toPath().resolve(url.getFile());
-		Path kaitaiDist = downloadAndExtract(url, kaitaiDistZip);
-		Path kaitaiJar;
-
-		mkdirs(output);
-		//todo Generate Java sources
-		//todo Add generated directory into Maven's build scope
-		project.addCompileSourceRoot(output.getAbsolutePath());
+		return url;
 	}
 
-	private Path downloadAndExtract(URL url, Path zip) throws MojoExecutionException {
-		download(url, zip);
-		return unpack(zip);
+	static Path prepareCache(File target, MavenSession session) throws MojoExecutionException {
+		Path cache;
+		if (target == null) {
+			Path repository = new File(session.getLocalRepository().getBasedir()).toPath();
+			cache = repository.resolve(".cache").resolve("kaitai").normalize();
+		} else {
+			cache = target.toPath();
+		}
+		return mkdirs(cache);
+	}
+
+	static Path downloadKaitai(URL url, Path cacheDir) throws MojoExecutionException {
+		Path distZip = cacheDir.resolve(url.getFile());
+		download(url, distZip);
+		Path dist = unpack(distZip);
+		List<Path> bats = scanFiles(dist, new String[]{KAITAI_START_SCRIPT}, new String[0]);
+		if (bats.size() != 1) {
+			throw new MojoExecutionException(format(
+				"Fail to find start script '%s' in Kaitai distribution: %s"
+				, KAITAI_START_SCRIPT
+				, dist.normalize().toFile().getAbsolutePath()
+			));
+		}
+		return bats.get(0);
 	}
 }
