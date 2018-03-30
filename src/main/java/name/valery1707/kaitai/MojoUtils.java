@@ -14,8 +14,11 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -30,6 +33,33 @@ public final class MojoUtils {
 		if (!Files.isRegularFile(target) || !Files.isReadable(target)) {
 			throw new MojoExecutionException(format(
 				"Fail to read file: %s"
+				, target.normalize().toFile().getAbsolutePath()
+			));
+		}
+	}
+
+	public static void checkFileIsExecutable(Path target) throws MojoExecutionException {
+		checkFileIsReadable(target);
+		if (!Files.isExecutable(target)) {
+			try {
+				Set<PosixFilePermission> perms = new HashSet<>(
+					Files.getPosixFilePermissions(
+						target,
+						LinkOption.NOFOLLOW_LINKS
+					)
+				);
+				perms.add(PosixFilePermission.OWNER_EXECUTE);
+				Files.setPosixFilePermissions(target, perms);
+			} catch (IOException e) {
+				throw new MojoExecutionException(format(
+					"Fail to set executable flag to file: %s"
+					, target.normalize().toFile().getAbsolutePath()
+				));
+			}
+		}
+		if (!Files.isExecutable(target)) {
+			throw new MojoExecutionException(format(
+				"Fail to execute file: %s"
 				, target.normalize().toFile().getAbsolutePath()
 			));
 		}

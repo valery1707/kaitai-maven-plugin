@@ -103,6 +103,12 @@
 			<version>2.9.0</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.github.marschall</groupId>
+			<artifactId>memoryfilesystem</artifactId>
+			<version>1.2.0</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

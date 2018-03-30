@@ -1,5 +1,6 @@
 package name.valery1707.kaitai;
 
+import com.github.marschall.memoryfilesystem.MemoryFileSystemBuilder;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -15,18 +16,20 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
+import java.nio.file.attribute.PosixFilePermission;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static name.valery1707.kaitai.MojoUtils.checkFileIsExecutable;
+import static name.valery1707.kaitai.MojoUtils.mkdirs;
 import static org.apache.commons.io.FilenameUtils.getName;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,6 +47,27 @@ public class MojoUtilsTest {
 
 	private Path copy(String resource) throws IOException {
 		return copy(resource, temporaryFolder.newFolder().toPath().resolve(getName(resource)));
+	}
+
+	private void testExecutable(FileSystem fs) throws MojoExecutionException, IOException {
+		Path tempDir = mkdirs(fs.getPath("tmp", "test-executable"));
+		Path script = Files.createFile(tempDir.resolve("script.sh"));
+		checkFileIsExecutable(script);
+	}
+
+	@Test
+	public void testExecutable_unix() throws MojoExecutionException, IOException {
+		Set<PosixFilePermission> reverseMask = EnumSet.of(
+			PosixFilePermission.OWNER_EXECUTE,
+			PosixFilePermission.GROUP_EXECUTE,
+			PosixFilePermission.OTHERS_EXECUTE
+		);
+		testExecutable(MemoryFileSystemBuilder.newLinux().setUmask(reverseMask).build());
+	}
+
+	@Test
+	public void testExecutable_windows() throws MojoExecutionException, IOException {
+		testExecutable(MemoryFileSystemBuilder.newWindows().build());
 	}
 
 	@Test

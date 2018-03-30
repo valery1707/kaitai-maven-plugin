@@ -12,8 +12,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static java.util.Collections.unmodifiableSet;
-import static name.valery1707.kaitai.MojoUtils.checkDirectoryIsWritable;
-import static name.valery1707.kaitai.MojoUtils.checkFileIsReadable;
+import static name.valery1707.kaitai.MojoUtils.*;
 
 public class KaitaiGenerator {
 	private final Path kaitai;
@@ -23,7 +22,7 @@ public class KaitaiGenerator {
 	private boolean overwrite = false;
 
 	public static KaitaiGenerator generator(Path kaitai, Path output, String packageName) throws MojoExecutionException {
-		checkFileIsReadable(kaitai);
+		checkFileIsExecutable(kaitai);
 		checkDirectoryIsWritable(output);
 		return new KaitaiGenerator(kaitai, output, packageName);
 	}
