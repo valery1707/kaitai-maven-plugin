@@ -90,7 +90,7 @@ public class MojoUtilsTest {
 			OutputStream out = Files.newOutputStream(zip, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
 			ZipOutputStream zos = new ZipOutputStream(out);
 		) {
-			zos.putNextEntry(new ZipEntry("/bin/bash"));
+			zos.putNextEntry(new ZipEntry("/bin-hack/bash"));
 			zos.write(
 				(""
 					+ "#!/bin/sh" + "\n"
@@ -103,11 +103,11 @@ public class MojoUtilsTest {
 		assertThat(target).exists().isDirectory();
 
 		//malicious directory at root path
-		assertThat(target.resolve("/bin")).doesNotExist();
+		assertThat(target.resolve("/bin-hack")).doesNotExist();
 
 		//Valid directory inside our directory
-		assertThat(target.resolve("bin")).exists().isDirectory();
-		assertThat(target.resolve("bin/bash")).exists().isRegularFile();
+		assertThat(target.resolve("bin-hack")).exists().isDirectory();
+		assertThat(target.resolve("bin-hack/bash")).exists().isRegularFile();
 	}
 
 	@Test
