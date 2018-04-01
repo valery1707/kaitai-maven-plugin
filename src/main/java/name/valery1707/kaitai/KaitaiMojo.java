@@ -16,6 +16,7 @@ import org.apache.maven.settings.Settings;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -134,6 +135,7 @@ public class KaitaiMojo extends AbstractMojo {
 		}
 
 		//Scan source files
+		sourceDirectory = sourceDirectory.toPath().normalize().toFile();
 		if (!sourceDirectory.exists()) {
 			getLog().warn(format(
 				"Skip KaiTai generation: Source directory does not exists: %s"

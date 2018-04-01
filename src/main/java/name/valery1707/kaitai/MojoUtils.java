@@ -82,7 +82,7 @@ public final class MojoUtils {
 		);
 		try {
 			ArrayList<Path> list = new ArrayList<>();
-			Files.walkFileTree(root, new FilterFileVisitor(filter, list));
+			Files.walkFileTree(root.normalize(), new FilterFileVisitor(filter, list));
 			return list;
 		} catch (IOException e) {
 			throw new MojoExecutionException(format(
@@ -104,6 +104,7 @@ public final class MojoUtils {
 	}
 
 	public static Path mkdirs(Path target) throws MojoExecutionException {
+		target = target.normalize();
 		if (!Files.exists(target)) {
 			try {
 				Files.createDirectories(target);
