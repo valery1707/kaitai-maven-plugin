@@ -1,0 +1,23 @@
+<settings>
+  <profiles>
+    <profile>
+      <id>kaitai-maven-plugin</id>
+      <properties>
+        <gpg.homedir>/home/r</gpg.homedir>
+        <gpg.keyname><!-- gpg --list-secret-keys | grep -e 'sec ' | cut -d'/' -f2 | cut -d' ' -f1 --></gpg.keyname>
+        <gpg.passphrase><!-- passphrase: echo date --iso-8601=seconds | gpg --clearsign --></gpg.passphrase>
+      </properties>
+    </profile>
+  </profiles>
+  <servers>
+    <server>
+      <id>oss.sonatype.org</id>
+      <username><!-- Sonatype JIRA username --></username>
+      <password><!-- Sonatype JIRA password --></password>
+    </server>
+    <server>
+      <id>github</id>
+      <privateKey><!-- Create [new token](https://github.com/settings/tokens) with name `kaitai-maven-plugin:github-release` and scopes (`public_repo`) --></privateKey>
+    </server>
+  </servers>
+</settings>

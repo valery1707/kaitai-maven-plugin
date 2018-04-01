@@ -1,0 +1,4 @@
+*.gpg
+*.key
+*.pub
+settings.xml

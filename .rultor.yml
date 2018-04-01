@@ -1,0 +1,15 @@
+docker:
+  image: yegor256/java8
+decrypt:
+  settings.xml: "repo/.rultor/settings.xml.asc"
+  pubring.gpg: "repo/.rultor/pubring.gpg.asc"
+  secring.gpg: "repo/.rultor/secring.gpg.asc"
+  id_rsa: "repo/.rultor/github-deploy.key.asc"
+  id_rsa.pub: "repo/.rultor/github-deploy.key.pub.asc"
+install: |-
+  java -version
+deploy:
+  script: |
+    bash .rultor/deploy.sh
+merge:
+  script: mvn clean verify -P run-its

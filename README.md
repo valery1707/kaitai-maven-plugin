@@ -1,6 +1,8 @@
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/name.valery1707.kaitai/kaitai-maven-plugin/badge.svg)](https://maven-badges.herokuapp.com/maven-central/name.valery1707.kaitai/kaitai-maven-plugin)
+
 [![Build Status](https://travis-ci.org/valery1707/kaitai-maven-plugin.svg?branch=master)](https://travis-ci.org/valery1707/kaitai-maven-plugin)
 
-
+[![DevOps By Rultor.com](http://www.rultor.com/b/valery1707/kaitai-maven-plugin)](http://www.rultor.com/p/valery1707/kaitai-maven-plugin)
 
 ### Useful commands
 
