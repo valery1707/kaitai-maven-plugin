@@ -1,6 +1,7 @@
 package name.valery1707.kaitai;
 
 import com.github.marschall.memoryfilesystem.MemoryFileSystemBuilder;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -9,7 +10,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import javax.xml.bind.DatatypeConverter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -144,7 +144,7 @@ public class MojoUtilsTest {
 
 		MessageDigest digest = MessageDigest.getInstance("SHA1");
 		Files.copy(target, new DigestOutputStream(new NullOutputStream(), digest));
-		String hashActual = DatatypeConverter.printHexBinary(digest.digest());
+		String hashActual = Hex.encodeHexString(digest.digest());
 
 		try (
 			InputStream shaExpected = new URL(source.toExternalForm() + ".sha1").openStream();
