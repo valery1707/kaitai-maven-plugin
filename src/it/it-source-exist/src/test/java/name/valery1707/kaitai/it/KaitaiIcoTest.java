@@ -9,7 +9,7 @@ import java.io.InputStream;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class KaitaiIcoTest {
 	private KaitaiStream getResourceAsStream(String resource) {
@@ -37,7 +37,13 @@ public class KaitaiIcoTest {
 	@Test
 	public void test() {
 		Ico ico = new Ico(getResourceAsStream("/document.ico"));
-		assertNotNull(ico);
-		assertEquals(23, ico.numImages());
+		assertThat(ico).isNotNull();
+
+		assertThat(ico.magic()).isNotNull().hasSize(4).containsExactly(0, 0, 1, 0);
+
+		assertThat(ico.images()).isNotNull().hasSize(23).hasSize(ico.numImages());
+
+		assertThat(ico.images().get(0)).isNotNull();
+		assertThat(ico.images().get(0).img()).isNotNull().hasSize(816).startsWith(40, 0, 0, 0, 48);
 	}
 }
