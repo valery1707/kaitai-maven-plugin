@@ -8,4 +8,7 @@ jdk:
   - openjdk8
 
 script:
-- mvn clean verify -P run-its
+  - mvn clean verify -P run-its
+
+after_success:
+  - python <(curl -s https://raw.githubusercontent.com/TouK/sputnik-ci/master/sputnik-ci.py)
