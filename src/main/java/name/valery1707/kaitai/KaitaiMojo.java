@@ -5,7 +5,6 @@ import org.apache.commons.lang3.SystemUtils;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -16,7 +15,6 @@ import org.apache.maven.settings.Settings;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -128,7 +126,7 @@ public class KaitaiMojo extends AbstractMojo {
 	/**
 	 * Executes the plugin, to read the given source and behavioural properties and generate POJOs.
 	 */
-	public void execute() throws MojoExecutionException, MojoFailureException {
+	public void execute() throws MojoExecutionException {
 		if (skip) {
 			getLog().info("Skip KaiTai generation: skip=true");
 			return;

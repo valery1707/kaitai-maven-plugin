@@ -14,6 +14,7 @@ import java.util.Set;
 import static java.util.Collections.unmodifiableSet;
 import static name.valery1707.kaitai.MojoUtils.*;
 
+@SuppressWarnings("WeakerAccess")
 public class KaitaiGenerator {
 	private final Path kaitai;
 	private final Path output;
@@ -77,8 +78,6 @@ public class KaitaiGenerator {
 
 	private ProcBuilder process(Log log) {
 		return new ProcBuilder(getKaitai().normalize().toAbsolutePath().toString())
-//		return new ProcBuilder(getKaitai().getFileName().toString())
-//			.withWorkingDirectory(getKaitai().getParent().toFile())
 			.withErrorStream(LogWriter.logError(log))
 			.withOutputStream(LogWriter.logInfo(log))
 			.withExpectedExitStatuses(0)

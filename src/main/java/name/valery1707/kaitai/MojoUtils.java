@@ -25,6 +25,7 @@ import java.util.zip.ZipInputStream;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.removeStart;
 
+@SuppressWarnings("WeakerAccess")
 public final class MojoUtils {
 	private MojoUtils() {
 	}
@@ -151,6 +152,7 @@ public final class MojoUtils {
 		}
 	}
 
+	@SuppressWarnings("UnnecessarySemicolon")
 	public static void download(URL source, Path target, Log log) throws MojoExecutionException {
 		if (Files.exists(target)) {
 			return;
@@ -178,6 +180,7 @@ public final class MojoUtils {
 		move(temp, target);
 	}
 
+	@SuppressWarnings("UnnecessarySemicolon")
 	public static Path unpack(Path zip, Log log) throws MojoExecutionException {
 		String filename = zip.getFileName().toString();
 		String extension = FilenameUtils.getExtension(filename);

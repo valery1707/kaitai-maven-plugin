@@ -72,7 +72,7 @@ public class MojoUtilsTest {
 
 	@Test
 	public void testScanFiles() throws MojoExecutionException {
-		List<Path> files = MojoUtils.scanFiles(new File(".").toPath(), new String[]{"*.java"}, new String[]{"My*.java", "*Test.java"});
+		List<Path> files = MojoUtils.scanFiles(new File(".").toPath(), new String[]{"*.java"}, new String[]{"Log*.java", "*Test.java"});
 		assertThat(files)
 			.isNotEmpty()
 			.contains(
@@ -82,7 +82,7 @@ public class MojoUtilsTest {
 				new File(".").toPath().resolve("src/main/java/name/valery1707/kaitai/KaitaiMojo.java"),
 				new File(".").toPath().resolve("src/main/java/name/valery1707/kaitai/KaitaiMojo.java").toAbsolutePath(),
 				new File(".").toPath().resolve("src/main/java/name/valery1707/kaitai/KaitaiMojo.java").normalize(),
-				new File(".").toPath().resolve("src/main/java/name/valery1707/kaitai/MyMojo.java"),
+				new File(".").toPath().resolve("src/main/java/name/valery1707/kaitai/LogWriter.java"),
 				new File(".").toPath().resolve("src/test/java/name/valery1707/kaitai/MojoUtilsTest.java")
 			)
 		;
@@ -110,6 +110,7 @@ public class MojoUtilsTest {
 	@Test
 	public void testUnpack_zipEntry_withPathStartingWithSlash() throws IOException, MojoExecutionException {
 		Path zip = temporaryFolder.newFile("malicious.zip").toPath();
+		//noinspection UnnecessarySemicolon
 		try (
 			OutputStream out = Files.newOutputStream(zip, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
 			ZipOutputStream zos = new ZipOutputStream(out);
@@ -146,6 +147,7 @@ public class MojoUtilsTest {
 		Files.copy(target, new DigestOutputStream(new NullOutputStream(), digest));
 		String hashActual = Hex.encodeHexString(digest.digest());
 
+		//noinspection UnnecessarySemicolon
 		try (
 			InputStream shaExpected = new URL(source.toExternalForm() + ".sha1").openStream();
 		) {

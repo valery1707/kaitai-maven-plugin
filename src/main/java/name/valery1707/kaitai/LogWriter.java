@@ -6,9 +6,9 @@ import org.apache.maven.plugin.logging.Log;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("WeakerAccess")
 public class LogWriter extends Writer {
 	public enum Mode {
 		INFO,
