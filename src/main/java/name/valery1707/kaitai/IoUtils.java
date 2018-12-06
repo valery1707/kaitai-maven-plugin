@@ -4,7 +4,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
-import org.apache.maven.plugin.MojoExecutionException;
 import org.slf4j.Logger;
 
 import java.io.FileFilter;
@@ -30,16 +29,16 @@ public final class IoUtils {
 	private IoUtils() {
 	}
 
-	public static void checkFileIsReadable(Path target) throws MojoExecutionException {
+	public static void checkFileIsReadable(Path target) throws KaitaiException {
 		if (!Files.isRegularFile(target) || !Files.isReadable(target)) {
-			throw new MojoExecutionException(format(
+			throw new KaitaiException(format(
 				"Fail to read file: %s"
 				, target.normalize().toFile().getAbsolutePath()
 			));
 		}
 	}
 
-	public static void checkFileIsExecutable(Path target) throws MojoExecutionException {
+	public static void checkFileIsExecutable(Path target) throws KaitaiException {
 		checkFileIsReadable(target);
 		if (!Files.isExecutable(target)) {
 			try {
@@ -52,30 +51,30 @@ public final class IoUtils {
 				perms.add(PosixFilePermission.OWNER_EXECUTE);
 				Files.setPosixFilePermissions(target, perms);
 			} catch (IOException e) {
-				throw new MojoExecutionException(format(
+				throw new KaitaiException(format(
 					"Fail to set executable flag to file: %s"
 					, target.normalize().toFile().getAbsolutePath()
 				));
 			}
 		}
 		if (!Files.isExecutable(target)) {
-			throw new MojoExecutionException(format(
+			throw new KaitaiException(format(
 				"Fail to execute file: %s"
 				, target.normalize().toFile().getAbsolutePath()
 			));
 		}
 	}
 
-	public static void checkDirectoryIsReadable(Path target) throws MojoExecutionException {
+	public static void checkDirectoryIsReadable(Path target) throws KaitaiException {
 		if (!Files.isDirectory(target) || !Files.isReadable(target)) {
-			throw new MojoExecutionException(format(
+			throw new KaitaiException(format(
 				"Fail to read from directory: %s"
 				, target.normalize().toFile().getAbsolutePath()
 			));
 		}
 	}
 
-	public static List<Path> scanFiles(Path root, String[] includes, String[] excludes) throws MojoExecutionException {
+	public static List<Path> scanFiles(Path root, String[] includes, String[] excludes) throws KaitaiException {
 		checkDirectoryIsReadable(root);
 		FileFilter filter = FileFilterUtils.and(
 			new WildcardFileFilter(includes)
@@ -86,7 +85,7 @@ public final class IoUtils {
 			Files.walkFileTree(root.normalize(), new FilterFileVisitor(filter, list));
 			return list;
 		} catch (IOException e) {
-			throw new MojoExecutionException(format(
+			throw new KaitaiException(format(
 				"Fail to scan directory: %s"
 				, root.normalize().toFile().getAbsolutePath()
 			)
@@ -95,22 +94,22 @@ public final class IoUtils {
 		}
 	}
 
-	public static void checkDirectoryIsWritable(Path target) throws MojoExecutionException {
+	public static void checkDirectoryIsWritable(Path target) throws KaitaiException {
 		if (!Files.isDirectory(target) || !Files.isWritable(target)) {
-			throw new MojoExecutionException(format(
+			throw new KaitaiException(format(
 				"Fail to write into directory: %s"
 				, target.normalize().toFile().getAbsolutePath()
 			));
 		}
 	}
 
-	public static Path mkdirs(Path target) throws MojoExecutionException {
+	public static Path mkdirs(Path target) throws KaitaiException {
 		target = target.normalize();
 		if (!Files.exists(target)) {
 			try {
 				Files.createDirectories(target);
 			} catch (IOException e) {
-				throw new MojoExecutionException(format(
+				throw new KaitaiException(format(
 					"Fail to create directory: %s"
 					, target.normalize().toFile().getAbsolutePath()
 				)
@@ -122,14 +121,14 @@ public final class IoUtils {
 		return target;
 	}
 
-	private static void delete(Path path) throws MojoExecutionException {
+	private static void delete(Path path) throws KaitaiException {
 		if (!Files.exists(path)) {
 			return;
 		}
 		try {
 			Files.delete(path);
 		} catch (IOException e) {
-			throw new MojoExecutionException(format(
+			throw new KaitaiException(format(
 				"Fail to delete: %s"
 				, path.normalize().toFile().getAbsolutePath()
 			)
@@ -138,11 +137,11 @@ public final class IoUtils {
 		}
 	}
 
-	private static void move(Path source, Path target) throws MojoExecutionException {
+	private static void move(Path source, Path target) throws KaitaiException {
 		try {
 			Files.move(source, target, StandardCopyOption.ATOMIC_MOVE);
 		} catch (IOException e) {
-			throw new MojoExecutionException(format(
+			throw new KaitaiException(format(
 				"Fail to move '%s' into '%s'"
 				, source.normalize().toFile().getAbsolutePath()
 				, target.normalize().toFile().getAbsolutePath()
@@ -153,7 +152,7 @@ public final class IoUtils {
 	}
 
 	@SuppressWarnings("UnnecessarySemicolon")
-	public static void download(URL source, Path target, Logger log) throws MojoExecutionException {
+	public static void download(URL source, Path target, Logger log) throws KaitaiException {
 		if (Files.exists(target)) {
 			return;
 		}
@@ -169,7 +168,7 @@ public final class IoUtils {
 		) {
 			IOUtils.copy(is, os);
 		} catch (IOException e) {
-			throw new MojoExecutionException(format(
+			throw new KaitaiException(format(
 				"Fail to download '%s' into '%s'"
 				, source
 				, temp.normalize().toFile().getAbsolutePath()
@@ -181,7 +180,7 @@ public final class IoUtils {
 	}
 
 	@SuppressWarnings("UnnecessarySemicolon")
-	public static Path unpack(Path zip, Logger log) throws MojoExecutionException {
+	public static Path unpack(Path zip, Logger log) throws KaitaiException {
 		String filename = zip.getFileName().toString();
 		String extension = FilenameUtils.getExtension(filename);
 		Path dir = zip.resolveSibling(filename.replace("." + extension, ""));
@@ -209,7 +208,7 @@ public final class IoUtils {
 				Files.copy(zis, current, StandardCopyOption.REPLACE_EXISTING);
 			}
 		} catch (IOException e) {
-			throw new MojoExecutionException(format(
+			throw new KaitaiException(format(
 				"Fail to extract content of '%s'"
 				, zip.normalize().toFile().getAbsolutePath()
 			)

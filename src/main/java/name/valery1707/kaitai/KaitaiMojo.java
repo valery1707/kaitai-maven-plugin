@@ -128,6 +128,14 @@ public class KaitaiMojo extends AbstractMojo {
 	 * Executes the plugin, to read the given source and behavioural properties and generate POJOs.
 	 */
 	public void execute() throws MojoExecutionException {
+		try {
+			executeInt();
+		} catch (KaitaiException e) {
+			throw new MojoExecutionException(e.getMessage(), e.getCause());
+		}
+	}
+
+	private void executeInt() throws KaitaiException {
 		if (skip) {
 			getLog().info("Skip KaiTai generation: skip=true");
 			return;
@@ -171,7 +179,7 @@ public class KaitaiMojo extends AbstractMojo {
 				.overwrite(overwrite)
 				.generate(logger);
 		} catch (KaitaiException e) {
-			throw new MojoExecutionException(
+			throw new KaitaiException(
 				"Fail to generate Java files"
 				, e
 			);
@@ -181,18 +189,18 @@ public class KaitaiMojo extends AbstractMojo {
 		project.addCompileSourceRoot(generatedRoot.normalize().toFile().getAbsolutePath());
 	}
 
-	static URL prepareUrl(URL url, String version) throws MojoExecutionException {
+	static URL prepareUrl(URL url, String version) throws KaitaiException {
 		if (url == null) {
 			try {
 				url = new URL(format(URL_FORMAT, version, version));
 			} catch (MalformedURLException e) {
-				throw new MojoExecutionException("Invalid version: " + version, e);
+				throw new KaitaiException("Invalid version: " + version, e);
 			}
 		}
 		return url;
 	}
 
-	static Path prepareCache(File target, MavenSession session, Logger log) throws MojoExecutionException {
+	static Path prepareCache(File target, MavenSession session, Logger log) throws KaitaiException {
 		Path cache;
 		if (target == null) {
 			Path repository = new File(session.getLocalRepository().getBasedir()).toPath();
@@ -212,13 +220,13 @@ public class KaitaiMojo extends AbstractMojo {
 		put(false, ".bat");
 	}});
 
-	static Path downloadKaitai(URL url, Path cacheDir, Logger log) throws MojoExecutionException {
+	static Path downloadKaitai(URL url, Path cacheDir, Logger log) throws KaitaiException {
 		Path distZip = cacheDir.resolve(FilenameUtils.getName(url.getFile()));
 		download(url, distZip, log);
 		Path dist = unpack(distZip, log);
 		List<Path> bats = scanFiles(dist, new String[]{KAITAI_START_SCRIPT}, new String[0]);
 		if (bats.size() != 1) {
-			throw new MojoExecutionException(format(
+			throw new KaitaiException(format(
 				"Fail to find start script '%s' in Kaitai distribution: %s"
 				, KAITAI_START_SCRIPT
 				, dist.normalize().toFile().getAbsolutePath()

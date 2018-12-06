@@ -1,6 +1,5 @@
 package name.valery1707.kaitai;
 
-import org.apache.maven.plugin.MojoExecutionException;
 import org.buildobjects.process.ExternalProcessFailureException;
 import org.buildobjects.process.ProcBuilder;
 import org.buildobjects.process.StartupException;
@@ -22,7 +21,7 @@ public class KaitaiGenerator {
 	private final Set<Path> sources = new LinkedHashSet<>();
 	private boolean overwrite = false;
 
-	public static KaitaiGenerator generator(Path kaitai, Path output, String packageName) throws MojoExecutionException {
+	public static KaitaiGenerator generator(Path kaitai, Path output, String packageName) throws KaitaiException {
 		checkFileIsExecutable(kaitai);
 		checkDirectoryIsWritable(output);
 		return new KaitaiGenerator(kaitai, output, packageName);
@@ -50,13 +49,13 @@ public class KaitaiGenerator {
 		return unmodifiableSet(sources);
 	}
 
-	public KaitaiGenerator withSource(Path source) throws MojoExecutionException {
+	public KaitaiGenerator withSource(Path source) throws KaitaiException {
 		checkFileIsReadable(source);
 		this.sources.add(source);
 		return this;
 	}
 
-	public KaitaiGenerator withSource(Iterable<Path> sources) throws MojoExecutionException {
+	public KaitaiGenerator withSource(Iterable<Path> sources) throws KaitaiException {
 		for (Path source : sources) {
 			withSource(source);
 		}

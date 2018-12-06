@@ -4,7 +4,6 @@ import com.github.marschall.memoryfilesystem.MemoryFileSystemBuilder;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
-import org.apache.maven.plugin.MojoExecutionException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -49,14 +48,14 @@ public class IoUtilsTest {
 		return copy(resource, temporaryFolder.newFolder().toPath().resolve(getName(resource)));
 	}
 
-	private void testExecutable(FileSystem fs) throws MojoExecutionException, IOException {
+	private void testExecutable(FileSystem fs) throws KaitaiException, IOException {
 		Path tempDir = mkdirs(fs.getPath("tmp", "test-executable"));
 		Path script = Files.createFile(tempDir.resolve("script.sh"));
 		checkFileIsExecutable(script);
 	}
 
 	@Test
-	public void testExecutable_unix() throws MojoExecutionException, IOException {
+	public void testExecutable_unix() throws KaitaiException, IOException {
 		Set<PosixFilePermission> reverseMask = EnumSet.of(
 			PosixFilePermission.OWNER_EXECUTE,
 			PosixFilePermission.GROUP_EXECUTE,
@@ -66,12 +65,12 @@ public class IoUtilsTest {
 	}
 
 	@Test
-	public void testExecutable_windows() throws MojoExecutionException, IOException {
+	public void testExecutable_windows() throws KaitaiException, IOException {
 		testExecutable(MemoryFileSystemBuilder.newWindows().build());
 	}
 
 	@Test
-	public void testScanFiles() throws MojoExecutionException {
+	public void testScanFiles() throws KaitaiException {
 		List<Path> files = scanFiles(new File(".").toPath(), new String[]{"*.java"}, new String[]{"Log*.java", "*Test.java"});
 		assertThat(files)
 			.isNotEmpty()
@@ -89,7 +88,7 @@ public class IoUtilsTest {
 	}
 
 	@Test
-	public void testUnpack() throws IOException, MojoExecutionException {
+	public void testUnpack() throws IOException, KaitaiException {
 		Path zip = copy("/demo-vertx.zip");
 		Path target = unpack(zip, LOG);
 		assertThat(target).exists().isDirectory();
@@ -98,7 +97,7 @@ public class IoUtilsTest {
 	}
 
 	@Test
-	public void testUnpack_exists() throws IOException, MojoExecutionException {
+	public void testUnpack_exists() throws IOException, KaitaiException {
 		Path zip = copy("/demo-vertx.zip");
 		Files.createDirectories(zip.resolveSibling("demo-vertx"));
 		Path target = unpack(zip, LOG);
@@ -108,7 +107,7 @@ public class IoUtilsTest {
 	}
 
 	@Test
-	public void testUnpack_zipEntry_withPathStartingWithSlash() throws IOException, MojoExecutionException {
+	public void testUnpack_zipEntry_withPathStartingWithSlash() throws IOException, KaitaiException {
 		Path zip = temporaryFolder.newFile("malicious.zip").toPath();
 		//noinspection UnnecessarySemicolon
 		try (
@@ -136,7 +135,7 @@ public class IoUtilsTest {
 	}
 
 	@Test
-	public void testDownload_success() throws IOException, MojoExecutionException, NoSuchAlgorithmException {
+	public void testDownload_success() throws IOException, KaitaiException, NoSuchAlgorithmException {
 		Path target = temporaryFolder.newFile("assertj-core-2.9.0.jar").toPath();
 		Files.delete(target);
 		URL source = new URL("https://search.maven.org/remotecontent?filepath=org/assertj/assertj-core/2.9.0/assertj-core-2.9.0.jar");
@@ -158,7 +157,7 @@ public class IoUtilsTest {
 	}
 
 	@Test
-	public void testDownload_noDownloadIfExists() throws IOException, MojoExecutionException {
+	public void testDownload_noDownloadIfExists() throws IOException, KaitaiException {
 		Path target = temporaryFolder.newFile("assertj-core-2.9.0.jar").toPath();
 		URL source = new URL("https://search.maven.org/remotecontent?filepath=org/assertj/assertj-core/2.9.0/assertj-core-2.9.0.jar");
 		download(source, target, LOG);
@@ -169,8 +168,8 @@ public class IoUtilsTest {
 			.hasBinaryContent(new byte[0]);
 	}
 
-	@Test(expected = MojoExecutionException.class)
-	public void testDownload_404() throws IOException, MojoExecutionException {
+	@Test(expected = KaitaiException.class)
+	public void testDownload_404() throws IOException, KaitaiException {
 		Path target = temporaryFolder.newFile("assertj-core-2.9.0.jar").toPath();
 		Files.delete(target);
 		URL source = new URL("https://search.maven.org/remotecontent?filepath=org/assertj/assertj-core/2.7.0/assertj-core-2.9.0.jar");

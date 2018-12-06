@@ -1,6 +1,5 @@
 package name.valery1707.kaitai;
 
-import org.apache.maven.plugin.MojoExecutionException;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
@@ -33,14 +32,14 @@ public class KaitaiMojoTest {
 	public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 	@Test
-	public void testPrepareUrl_returnInputIfNonNull() throws MojoExecutionException {
+	public void testPrepareUrl_returnInputIfNonNull() throws KaitaiException {
 		URL url = getClass().getResource("/demo-vertx.zip");
 		assertThat(prepareUrl(url, null))
 			.isEqualTo(url);
 	}
 
 	@Test
-	public void testPrepareUrl_generateIfInputNull() throws MojoExecutionException {
+	public void testPrepareUrl_generateIfInputNull() throws KaitaiException {
 		assertThat(prepareUrl(null, "0.8"))
 			.isNotNull()
 			.hasNoParameters();
@@ -48,13 +47,13 @@ public class KaitaiMojoTest {
 
 	@Test
 	@Ignore
-	public void testPrepareUrl_failedIfBadVersion() throws MojoExecutionException {
-		exception.expect(MojoExecutionException.class);
+	public void testPrepareUrl_failedIfBadVersion() throws KaitaiException {
+		exception.expect(KaitaiException.class);
 		prepareUrl(null, "?#~@");
 	}
 
 	@Test
-	public void testPrepareCache_useExternal() throws IOException, MojoExecutionException {
+	public void testPrepareCache_useExternal() throws IOException, KaitaiException {
 		File folder = temporaryFolder.newFolder();
 		assertThat(prepareCache(folder, null, LOG))
 			.isDirectory()
@@ -64,15 +63,15 @@ public class KaitaiMojoTest {
 	}
 
 	@Test
-	public void testDownloadKaitai_invalidZipContent() throws IOException, MojoExecutionException {
-		exception.expect(MojoExecutionException.class);
+	public void testDownloadKaitai_invalidZipContent() throws IOException, KaitaiException {
+		exception.expect(KaitaiException.class);
 		exception.expectMessage(containsString("Fail to find start script"));
 		Path cache = temporaryFolder.newFolder().toPath();
 		downloadKaitai(getClass().getResource("/demo-vertx.zip"), cache, LOG);
 	}
 
 	@Test
-	public void testGenerate() throws IOException, MojoExecutionException, URISyntaxException, KaitaiException {
+	public void testGenerate() throws IOException, URISyntaxException, KaitaiException {
 		Path cache = temporaryFolder.newFolder().toPath();
 		Path kaitai = downloadKaitai(prepareUrl(null, "0.8"), cache, LOG);
 		Path source = Paths.get(getClass().getResource("/demo-vertx.zip").toURI())
