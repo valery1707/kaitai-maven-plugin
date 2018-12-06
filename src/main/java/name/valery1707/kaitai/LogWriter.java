@@ -1,7 +1,7 @@
 package name.valery1707.kaitai;
 
 import org.apache.commons.io.output.WriterOutputStream;
-import org.apache.maven.plugin.logging.Log;
+import org.slf4j.Logger;
 
 import java.io.OutputStream;
 import java.io.Writer;
@@ -15,23 +15,23 @@ public class LogWriter extends Writer {
 		ERROR,
 	}
 
-	private final Log log;
+	private final Logger log;
 	private final Mode mode;
 
-	private LogWriter(Log log, Mode mode) {
+	private LogWriter(Logger log, Mode mode) {
 		this.log = log;
 		this.mode = mode;
 	}
 
-	public static OutputStream log(Log log, Mode mode) {
+	public static OutputStream log(Logger log, Mode mode) {
 		return new WriterOutputStream(new LogWriter(log, mode), StandardCharsets.UTF_8, 1024, true);
 	}
 
-	public static OutputStream logInfo(Log log) {
+	public static OutputStream logInfo(Logger log) {
 		return log(log, Mode.INFO);
 	}
 
-	public static OutputStream logError(Log log) {
+	public static OutputStream logError(Logger log) {
 		return log(log, Mode.ERROR);
 	}
 

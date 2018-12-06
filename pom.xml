@@ -97,6 +97,16 @@
 			<artifactId>jproc</artifactId>
 			<version>2.2.2</version>
 		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.25</version>
+		</dependency>
+		<dependency>
+			<groupId>com.jcabi</groupId>
+			<artifactId>jcabi-maven-slf4j</artifactId>
+			<version>0.9</version>
+		</dependency>
 
 		<!--Test-->
 		<dependency>

@@ -5,12 +5,13 @@ import org.apache.commons.lang3.SystemUtils;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Settings;
+import org.slf4j.Logger;
+import org.slf4j.impl.StaticLoggerBinder;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -152,10 +153,13 @@ public class KaitaiMojo extends AbstractMojo {
 			return;
 		}
 
+		StaticLoggerBinder.getSingleton().setMavenLog(getLog());
+		Logger logger = StaticLoggerBinder.getSingleton().getLoggerFactory().getLogger(getClass().getName());
+
 		//Download Kaitai distribution into cache and unzip it
 		URL url = prepareUrl(this.url, version);
-		Path cacheDir = prepareCache(this.cacheDir, session, getLog());
-		Path kaitai = downloadKaitai(url, cacheDir, getLog());
+		Path cacheDir = prepareCache(this.cacheDir, session, logger);
+		Path kaitai = downloadKaitai(url, cacheDir, logger);
 
 		//Generate Java sources
 		Path output = mkdirs(this.output.toPath());
@@ -165,7 +169,7 @@ public class KaitaiMojo extends AbstractMojo {
 				.generator(kaitai, output, packageName)
 				.withSource(source)
 				.overwrite(overwrite)
-				.generate(getLog());
+				.generate(logger);
 		} catch (KaitaiException e) {
 			throw new MojoExecutionException(
 				"Fail to generate Java files"
@@ -188,7 +192,7 @@ public class KaitaiMojo extends AbstractMojo {
 		return url;
 	}
 
-	static Path prepareCache(File target, MavenSession session, Log log) throws MojoExecutionException {
+	static Path prepareCache(File target, MavenSession session, Logger log) throws MojoExecutionException {
 		Path cache;
 		if (target == null) {
 			Path repository = new File(session.getLocalRepository().getBasedir()).toPath();
@@ -208,7 +212,7 @@ public class KaitaiMojo extends AbstractMojo {
 		put(false, ".bat");
 	}});
 
-	static Path downloadKaitai(URL url, Path cacheDir, Log log) throws MojoExecutionException {
+	static Path downloadKaitai(URL url, Path cacheDir, Logger log) throws MojoExecutionException {
 		Path distZip = cacheDir.resolve(FilenameUtils.getName(url.getFile()));
 		download(url, distZip, log);
 		Path dist = unpack(distZip, log);

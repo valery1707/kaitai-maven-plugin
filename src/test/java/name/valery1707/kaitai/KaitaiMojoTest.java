@@ -1,12 +1,12 @@
 package name.valery1707.kaitai;
 
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,9 +21,10 @@ import static org.apache.commons.io.FilenameUtils.removeExtension;
 import static org.apache.commons.lang3.StringUtils.capitalize;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.slf4j.helpers.NOPLogger.NOP_LOGGER;
 
 public class KaitaiMojoTest {
-	private static final SystemStreamLog LOG = new SystemStreamLog();
+	private static final Logger LOG = NOP_LOGGER;
 
 	@Rule
 	public ExpectedException exception = ExpectedException.none();

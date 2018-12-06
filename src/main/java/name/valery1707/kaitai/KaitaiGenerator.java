@@ -1,11 +1,11 @@
 package name.valery1707.kaitai;
 
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.logging.Log;
 import org.buildobjects.process.ExternalProcessFailureException;
 import org.buildobjects.process.ProcBuilder;
 import org.buildobjects.process.StartupException;
 import org.buildobjects.process.TimeoutException;
+import org.slf4j.Logger;
 
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
@@ -76,7 +76,7 @@ public class KaitaiGenerator {
 		return this;
 	}
 
-	private ProcBuilder process(Log log) {
+	private ProcBuilder process(Logger log) {
 		return new ProcBuilder(getKaitai().normalize().toAbsolutePath().toString())
 			.withErrorStream(LogWriter.logError(log))
 			.withOutputStream(LogWriter.logInfo(log))
@@ -95,7 +95,7 @@ public class KaitaiGenerator {
 		}
 	}
 
-	public Path generate(Log log) throws KaitaiException {
+	public Path generate(Logger log) throws KaitaiException {
 		if (!isOverwrite()) {
 			//todo Remove exists file from source
 		}

@@ -5,7 +5,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.logging.Log;
+import org.slf4j.Logger;
 
 import java.io.FileFilter;
 import java.io.IOException;
@@ -153,7 +153,7 @@ public final class IoUtils {
 	}
 
 	@SuppressWarnings("UnnecessarySemicolon")
-	public static void download(URL source, Path target, Log log) throws MojoExecutionException {
+	public static void download(URL source, Path target, Logger log) throws MojoExecutionException {
 		if (Files.exists(target)) {
 			return;
 		}
@@ -181,7 +181,7 @@ public final class IoUtils {
 	}
 
 	@SuppressWarnings("UnnecessarySemicolon")
-	public static Path unpack(Path zip, Log log) throws MojoExecutionException {
+	public static Path unpack(Path zip, Logger log) throws MojoExecutionException {
 		String filename = zip.getFileName().toString();
 		String extension = FilenameUtils.getExtension(filename);
 		Path dir = zip.resolveSibling(filename.replace("." + extension, ""));

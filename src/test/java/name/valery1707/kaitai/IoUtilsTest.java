@@ -5,10 +5,10 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,9 +31,10 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static name.valery1707.kaitai.IoUtils.*;
 import static org.apache.commons.io.FilenameUtils.getName;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.slf4j.helpers.NOPLogger.NOP_LOGGER;
 
 public class IoUtilsTest {
-	private static final SystemStreamLog LOG = new SystemStreamLog();
+	private static final Logger LOG = NOP_LOGGER;
 
 	@Rule
 	public TemporaryFolder temporaryFolder = new TemporaryFolder();
