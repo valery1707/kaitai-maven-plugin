@@ -28,12 +28,11 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static name.valery1707.kaitai.MojoUtils.checkFileIsExecutable;
-import static name.valery1707.kaitai.MojoUtils.mkdirs;
+import static name.valery1707.kaitai.IoUtils.*;
 import static org.apache.commons.io.FilenameUtils.getName;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class MojoUtilsTest {
+public class IoUtilsTest {
 	private static final SystemStreamLog LOG = new SystemStreamLog();
 
 	@Rule
@@ -72,7 +71,7 @@ public class MojoUtilsTest {
 
 	@Test
 	public void testScanFiles() throws MojoExecutionException {
-		List<Path> files = MojoUtils.scanFiles(new File(".").toPath(), new String[]{"*.java"}, new String[]{"Log*.java", "*Test.java"});
+		List<Path> files = scanFiles(new File(".").toPath(), new String[]{"*.java"}, new String[]{"Log*.java", "*Test.java"});
 		assertThat(files)
 			.isNotEmpty()
 			.contains(
@@ -83,7 +82,7 @@ public class MojoUtilsTest {
 				new File(".").toPath().resolve("src/main/java/name/valery1707/kaitai/KaitaiMojo.java").toAbsolutePath(),
 				new File(".").toPath().resolve("src/main/java/name/valery1707/kaitai/KaitaiMojo.java").normalize(),
 				new File(".").toPath().resolve("src/main/java/name/valery1707/kaitai/LogWriter.java"),
-				new File(".").toPath().resolve("src/test/java/name/valery1707/kaitai/MojoUtilsTest.java")
+				new File(".").toPath().resolve("src/test/java/name/valery1707/kaitai/IoUtilsTest.java")
 			)
 		;
 	}
@@ -91,7 +90,7 @@ public class MojoUtilsTest {
 	@Test
 	public void testUnpack() throws IOException, MojoExecutionException {
 		Path zip = copy("/demo-vertx.zip");
-		Path target = MojoUtils.unpack(zip, LOG);
+		Path target = unpack(zip, LOG);
 		assertThat(target).exists().isDirectory();
 		assertThat(target.resolve("demo-vertx")).exists().isDirectory();
 		assertThat(target.resolve("demo-vertx/pom.xml")).exists().isRegularFile();
@@ -101,7 +100,7 @@ public class MojoUtilsTest {
 	public void testUnpack_exists() throws IOException, MojoExecutionException {
 		Path zip = copy("/demo-vertx.zip");
 		Files.createDirectories(zip.resolveSibling("demo-vertx"));
-		Path target = MojoUtils.unpack(zip, LOG);
+		Path target = unpack(zip, LOG);
 		assertThat(target).exists().isDirectory();
 		assertThat(target.resolve("demo-vertx")).doesNotExist();
 		assertThat(target.resolve("demo-vertx/pom.xml")).doesNotExist();
@@ -124,7 +123,7 @@ public class MojoUtilsTest {
 				).getBytes(UTF_8)
 			);
 		}
-		Path target = MojoUtils.unpack(zip, LOG);
+		Path target = unpack(zip, LOG);
 		assertThat(target).exists().isDirectory();
 
 		//malicious directory at root path
@@ -140,7 +139,7 @@ public class MojoUtilsTest {
 		Path target = temporaryFolder.newFile("assertj-core-2.9.0.jar").toPath();
 		Files.delete(target);
 		URL source = new URL("https://search.maven.org/remotecontent?filepath=org/assertj/assertj-core/2.9.0/assertj-core-2.9.0.jar");
-		MojoUtils.download(source, target, LOG);
+		download(source, target, LOG);
 		assertThat(target).exists().isRegularFile().isReadable();
 
 		MessageDigest digest = MessageDigest.getInstance("SHA1");
@@ -161,7 +160,7 @@ public class MojoUtilsTest {
 	public void testDownload_noDownloadIfExists() throws IOException, MojoExecutionException {
 		Path target = temporaryFolder.newFile("assertj-core-2.9.0.jar").toPath();
 		URL source = new URL("https://search.maven.org/remotecontent?filepath=org/assertj/assertj-core/2.9.0/assertj-core-2.9.0.jar");
-		MojoUtils.download(source, target, LOG);
+		download(source, target, LOG);
 		assertThat(target)
 			.exists()
 			.isRegularFile()
@@ -174,7 +173,7 @@ public class MojoUtilsTest {
 		Path target = temporaryFolder.newFile("assertj-core-2.9.0.jar").toPath();
 		Files.delete(target);
 		URL source = new URL("https://search.maven.org/remotecontent?filepath=org/assertj/assertj-core/2.7.0/assertj-core-2.9.0.jar");
-		MojoUtils.download(source, target, LOG);
+		download(source, target, LOG);
 		throw new IllegalStateException("Unreachable statement");
 	}
 }

@@ -19,7 +19,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 import static java.lang.String.format;
-import static name.valery1707.kaitai.MojoUtils.*;
+import static name.valery1707.kaitai.IoUtils.*;
 
 /**
  * @see <a href="http://maven.apache.org/developers/mojo-api-specification.html">Mojo API Specification</a>

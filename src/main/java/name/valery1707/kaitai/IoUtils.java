@@ -26,8 +26,8 @@ import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.removeStart;
 
 @SuppressWarnings("WeakerAccess")
-public final class MojoUtils {
-	private MojoUtils() {
+public final class IoUtils {
+	private IoUtils() {
 	}
 
 	public static void checkFileIsReadable(Path target) throws MojoExecutionException {
