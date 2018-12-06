@@ -11,7 +11,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static java.util.Collections.unmodifiableSet;
-import static name.valery1707.kaitai.IoUtils.*;
+import static name.valery1707.kaitai.KaitaiUtils.*;
 
 @SuppressWarnings("WeakerAccess")
 public class KaitaiGenerator {

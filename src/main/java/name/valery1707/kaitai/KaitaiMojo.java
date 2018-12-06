@@ -1,7 +1,5 @@
 package name.valery1707.kaitai;
 
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.SystemUtils;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -14,13 +12,13 @@ import org.slf4j.Logger;
 import org.slf4j.impl.StaticLoggerBinder;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 
 import static java.lang.String.format;
-import static name.valery1707.kaitai.IoUtils.*;
+import static name.valery1707.kaitai.KaitaiUtils.*;
 
 /**
  * @see <a href="http://maven.apache.org/developers/mojo-api-specification.html">Mojo API Specification</a>
@@ -30,8 +28,6 @@ import static name.valery1707.kaitai.IoUtils.*;
 	, defaultPhase = LifecyclePhase.GENERATE_SOURCES
 )
 public class KaitaiMojo extends AbstractMojo {
-	private static final String URL_FORMAT = "https://dl.bintray.com/kaitai-io/universal/%s/kaitai-struct-compiler-%s.zip";
-	private static final String KAITAI_START_SCRIPT = "kaitai-struct-compiler.bat";
 
 	/**
 	 * Version of <a href="http://kaitai.io/#download">KaiTai</a> library.
@@ -166,7 +162,7 @@ public class KaitaiMojo extends AbstractMojo {
 
 		//Download Kaitai distribution into cache and unzip it
 		URL url = prepareUrl(this.url, version);
-		Path cacheDir = prepareCache(this.cacheDir, session, logger);
+		Path cacheDir = prepareCache(detectCacheDir(), logger);
 		Path kaitai = downloadKaitai(url, cacheDir, logger);
 
 		//Generate Java sources
@@ -189,51 +185,12 @@ public class KaitaiMojo extends AbstractMojo {
 		project.addCompileSourceRoot(generatedRoot.normalize().toFile().getAbsolutePath());
 	}
 
-	static URL prepareUrl(URL url, String version) throws KaitaiException {
-		if (url == null) {
-			try {
-				url = new URL(format(URL_FORMAT, version, version));
-			} catch (MalformedURLException e) {
-				throw new KaitaiException("Invalid version: " + version, e);
-			}
-		}
-		return url;
-	}
-
-	static Path prepareCache(File target, MavenSession session, Logger log) throws KaitaiException {
-		Path cache;
-		if (target == null) {
-			Path repository = new File(session.getLocalRepository().getBasedir()).toPath();
-			cache = repository.resolve(".cache").resolve("kaitai").normalize();
+	private Path detectCacheDir() {
+		if (cacheDir != null) {
+			return cacheDir.toPath();
 		} else {
-			cache = target.toPath();
+			Path repository = new File(session.getLocalRepository().getBasedir()).toPath();
+			return repository.resolve(".cache").resolve("kaitai").normalize();
 		}
-		log.debug(format(
-			"KaiTai distribution: Prepare cache directory: %s"
-			, cache.normalize().toFile().getAbsolutePath()
-		));
-		return mkdirs(cache);
-	}
-
-	private static final Map<Boolean, String> SCRIPT_SUFFIX_REMOVER = Collections.unmodifiableMap(new HashMap<Boolean, String>() {{
-		put(true, "");
-		put(false, ".bat");
-	}});
-
-	static Path downloadKaitai(URL url, Path cacheDir, Logger log) throws KaitaiException {
-		Path distZip = cacheDir.resolve(FilenameUtils.getName(url.getFile()));
-		download(url, distZip, log);
-		Path dist = unpack(distZip, log);
-		List<Path> bats = scanFiles(dist, new String[]{KAITAI_START_SCRIPT}, new String[0]);
-		if (bats.size() != 1) {
-			throw new KaitaiException(format(
-				"Fail to find start script '%s' in Kaitai distribution: %s"
-				, KAITAI_START_SCRIPT
-				, dist.normalize().toFile().getAbsolutePath()
-			));
-		}
-		Path bat = bats.get(0);
-		String suffixToRemove = SCRIPT_SUFFIX_REMOVER.get(SystemUtils.IS_OS_WINDOWS);
-		return bat.resolveSibling(bat.getFileName().toString().replace(suffixToRemove, ""));
 	}
 }

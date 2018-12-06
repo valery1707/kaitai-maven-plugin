@@ -4,20 +4,19 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 
 import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -25,8 +24,8 @@ import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.removeStart;
 
 @SuppressWarnings("WeakerAccess")
-public final class IoUtils {
-	private IoUtils() {
+public final class KaitaiUtils {
+	private KaitaiUtils() {
 	}
 
 	public static void checkFileIsReadable(Path target) throws KaitaiException {
@@ -217,6 +216,50 @@ public final class IoUtils {
 		}
 		move(temp, dir);
 		return dir;
+	}
+
+	private static final String URL_FORMAT = "https://dl.bintray.com/kaitai-io/universal/%s/kaitai-struct-compiler-%s.zip";
+
+	public static URL prepareUrl(URL url, String version) throws KaitaiException {
+		if (url == null) {
+			try {
+				url = new URL(format(URL_FORMAT, version, version));
+			} catch (MalformedURLException e) {
+				throw new KaitaiException("Invalid version: " + version, e);
+			}
+		}
+		return url;
+	}
+
+	public static Path prepareCache(Path cache, Logger log) throws KaitaiException {
+		log.debug(format(
+			"KaiTai distribution: Prepare cache directory: %s"
+			, cache.normalize().toFile().getAbsolutePath()
+		));
+		return mkdirs(cache);
+	}
+
+	private static final String KAITAI_START_SCRIPT = "kaitai-struct-compiler.bat";
+	private static final Map<Boolean, String> SCRIPT_SUFFIX_REMOVER = Collections.unmodifiableMap(new HashMap<Boolean, String>() {{
+		put(true, "");
+		put(false, ".bat");
+	}});
+
+	public static Path downloadKaitai(URL url, Path cacheDir, Logger log) throws KaitaiException {
+		Path distZip = cacheDir.resolve(FilenameUtils.getName(url.getFile()));
+		download(url, distZip, log);
+		Path dist = unpack(distZip, log);
+		List<Path> bats = scanFiles(dist, new String[]{KAITAI_START_SCRIPT}, new String[0]);
+		if (bats.size() != 1) {
+			throw new KaitaiException(format(
+				"Fail to find start script '%s' in Kaitai distribution: %s"
+				, KAITAI_START_SCRIPT
+				, dist.normalize().toFile().getAbsolutePath()
+			));
+		}
+		Path bat = bats.get(0);
+		String suffixToRemove = SCRIPT_SUFFIX_REMOVER.get(SystemUtils.IS_OS_WINDOWS);
+		return bat.resolveSibling(bat.getFileName().toString().replace(suffixToRemove, ""));
 	}
 
 	private static class FilterFileVisitor extends SimpleFileVisitor<Path> {
