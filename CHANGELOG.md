@@ -2,6 +2,8 @@ Change log for releases.
 
 # SNAPSHOT
 
+# 0.1.2
+
 * Some cleanup and refactor
 
 # 0.1.1
