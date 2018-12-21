@@ -9,7 +9,7 @@
 	<artifactId>it-source-empty</artifactId>
 	<version>1.0-SNAPSHOT</version>
 
-	<description>Use case: source directory with KaiTai templates exists but empty</description>
+	<description>Use case: source directory with KaiTai templates exists but all files are excluded</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
