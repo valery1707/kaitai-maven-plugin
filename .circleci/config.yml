@@ -11,6 +11,13 @@ jobs:
     steps:
       - checkout
 
+      - run:
+          name: Detect project version
+          command: |
+            echo 'export PROJECT_VERSION=$(cat pom.xml | grep "<version>" | head -n1 | cut -d">" -f2 | cut -d"<" -f1)' >> $BASH_ENV
+            source $BASH_ENV
+            echo "Detect version: ${PROJECT_VERSION}"
+
       - restore_cache: # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
           key: kaitai-maven-plugin-{{ checksum "pom.xml" }}
 
@@ -26,5 +33,10 @@ jobs:
       - store_test_results: # Upload test results for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
           path: target/surefire-reports
 
+      - run: # Store artifacts don't support interpolation https://discuss.circleci.com/t/-/11226
+          name: Prepare artifacts
+          command: |
+            cp -v target/kaitai-maven-plugin-${PROJECT_VERSION}.jar target/kaitai-maven-plugin.jar
+
       - store_artifacts: # Upload test summary for display in Artifacts: https://circleci.com/docs/2.0/artifacts/
-          path: target/kaitai-maven-plugin-0.1.3-SNAPSHOT.jar # todo version hardcoded
+          path: target/kaitai-maven-plugin.jar
