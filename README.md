@@ -3,6 +3,7 @@
 
 [![Build Status](https://travis-ci.org/valery1707/kaitai-maven-plugin.svg?branch=master)](https://travis-ci.org/valery1707/kaitai-maven-plugin)
 [![Build status](https://ci.appveyor.com/api/projects/status/bbvjf5q9faru09xp/branch/master?svg=true)](https://ci.appveyor.com/project/valery1707/kaitai-maven-plugin/branch/master)
+[![CircleCI](https://circleci.com/gh/valery1707/kaitai-maven-plugin/tree/master.svg?style=svg)](https://circleci.com/gh/valery1707/kaitai-maven-plugin/tree/master)
 
 [![DevOps By Rultor.com](http://www.rultor.com/b/valery1707/kaitai-maven-plugin)](http://www.rultor.com/p/valery1707/kaitai-maven-plugin)
 
