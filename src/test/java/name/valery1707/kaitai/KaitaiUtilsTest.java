@@ -4,6 +4,7 @@ import com.github.marschall.memoryfilesystem.MemoryFileSystemBuilder;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
+import org.buildobjects.process.ExternalProcessFailureException;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
@@ -30,12 +31,14 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static name.valery1707.kaitai.KaitaiMojo.KAITAI_VERSION;
 import static name.valery1707.kaitai.KaitaiUtils.*;
 import static org.apache.commons.io.FilenameUtils.getName;
 import static org.apache.commons.io.FilenameUtils.removeExtension;
 import static org.apache.commons.lang3.StringUtils.capitalize;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.fail;
 import static org.slf4j.helpers.NOPLogger.NOP_LOGGER;
 
 public class KaitaiUtilsTest {
@@ -195,7 +198,7 @@ public class KaitaiUtilsTest {
 
 	@Test
 	public void testPrepareUrl_generateIfInputNull() throws KaitaiException {
-		assertThat(prepareUrl(null, "0.8"))
+		assertThat(prepareUrl(null, KAITAI_VERSION))
 			.isNotNull()
 			.hasNoParameters();
 	}
@@ -225,19 +228,27 @@ public class KaitaiUtilsTest {
 		downloadKaitai(getClass().getResource("/demo-vertx.zip"), cache, LOG);
 	}
 
-	@Test
-	public void testGenerate() throws IOException, URISyntaxException, KaitaiException {
-		Path cache = temporaryFolder.newFolder().toPath();
-		Path kaitai = downloadKaitai(prepareUrl(null, "0.8"), cache, LOG);
-		Path source = Paths.get(getClass().getResource("/demo-vertx.zip").toURI())
+	private Path findIt() throws URISyntaxException {
+		return Paths.get(getClass().getResource("/demo-vertx.zip").toURI())
 			.getParent().getParent().getParent()
-			.resolve("src/it")
-			.resolve("it-source-exist/src/main/resources/kaitai/ico.ksy");
+			.resolve("src/it");
+	}
+
+	private KaitaiGenerator generator(Path... sources) throws IOException, KaitaiException {
+		Path cache = temporaryFolder.newFolder().toPath();
+		Path kaitai = downloadKaitai(prepareUrl(null, KAITAI_VERSION), cache, LOG);
 		Path generated = cache.resolve("generated");
 		Files.createDirectory(generated);
-		KaitaiGenerator generator = KaitaiGenerator
+		return KaitaiGenerator
 			.generator(kaitai, generated, "name.valery1707.kaitai.test")
-			.withSource(source);
+			.withSource(sources);
+	}
+
+	@Test
+	public void testGenerate_success() throws IOException, URISyntaxException, KaitaiException {
+		Path source = findIt()
+			.resolve("it-source-exist/src/main/resources/kaitai/ico.ksy");
+		KaitaiGenerator generator = generator(source);
 		Path target = generator.generate(LOG);
 		assertThat(target).isDirectory().hasFileName("src");
 		Path pkg = target.resolve(generator.getPackageName().replace('.', '/'));
@@ -246,6 +257,30 @@ public class KaitaiUtilsTest {
 			String kaitaiName = src.getFileName().toString();
 			String javaName = capitalize(removeExtension(kaitaiName) + ".java");
 			assertThat(pkg.resolve(javaName)).isRegularFile();
+		}
+	}
+
+	@Test
+	public void testGenerate_failed() throws IOException, URISyntaxException, KaitaiException {
+		Path source = findIt()
+			.resolve("it-source-failed/src/main/resources/kaitai/demo.ksy");
+		KaitaiGenerator generator = generator(source);
+		try {
+			generator.generate(LOG);
+			fail("Must generate exception because of problems in specification");
+		} catch (KaitaiException e) {
+			assertThat(e)
+				.hasMessageContaining("/types/header/seq/0/id: invalid attribute ID: 'Magic', expected /^[a-z][a-z0-9_]*$/")
+			;
+			assertThat(e.getMessage()).doesNotContain(KAITAI_VERSION);
+
+			assertThat(e.getCause())
+				.isInstanceOf(ExternalProcessFailureException.class)
+				.hasMessageContaining("Stderr unavailable as it has been consumed by user provided stream.")
+				.hasMessageContaining("returned 2 after")
+			;
+
+			assertThat(generator.getOutput().resolve("scr")).doesNotExist();
 		}
 	}
 }

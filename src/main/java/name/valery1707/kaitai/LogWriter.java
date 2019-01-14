@@ -61,7 +61,6 @@ public class LogWriter extends Writer {
 
 	@Override
 	public void flush() {
-
 	}
 
 	@Override

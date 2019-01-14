@@ -8,6 +8,6 @@ public class KaitaiException extends Exception {
 	}
 
 	public KaitaiException(String message, Throwable cause) {
-		super(message, cause);
+		super(message.trim(), cause);
 	}
 }

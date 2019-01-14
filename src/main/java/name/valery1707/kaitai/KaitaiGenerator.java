@@ -1,5 +1,7 @@
 package name.valery1707.kaitai;
 
+import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.commons.io.output.TeeOutputStream;
 import org.buildobjects.process.ExternalProcessFailureException;
 import org.buildobjects.process.ProcBuilder;
 import org.buildobjects.process.StartupException;
@@ -7,9 +9,11 @@ import org.buildobjects.process.TimeoutException;
 import org.slf4j.Logger;
 
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.unmodifiableSet;
 import static name.valery1707.kaitai.KaitaiUtils.*;
 
@@ -20,6 +24,8 @@ public class KaitaiGenerator {
 	private final String packageName;
 	private final Set<Path> sources = new LinkedHashSet<>();
 	private boolean overwrite = false;
+	private final ByteArrayOutputStream streamError = new ByteArrayOutputStream(256);
+	private final ByteArrayOutputStream streamOutput = new ByteArrayOutputStream(256);
 
 	/**
 	 * Build {@code KaitaiGenerator} with preconfigured state.
@@ -85,6 +91,10 @@ public class KaitaiGenerator {
 		return this;
 	}
 
+	public KaitaiGenerator withSource(Path... sources) throws KaitaiException {
+		return withSource(Arrays.asList(sources));
+	}
+
 	public boolean isOverwrite() {
 		return overwrite;
 	}
@@ -100,18 +110,22 @@ public class KaitaiGenerator {
 
 	private ProcBuilder process(Logger log) {
 		return new ProcBuilder(getKaitai().normalize().toAbsolutePath().toString())
-			.withErrorStream(LogWriter.logError(log))
-			.withOutputStream(LogWriter.logInfo(log))
+			.withErrorStream(new TeeOutputStream(LogWriter.logError(log), streamError))
+			.withOutputStream(new TeeOutputStream(LogWriter.logInfo(log), streamOutput))
 			.withExpectedExitStatuses(0)
 			;
 	}
 
 	private void execute(ProcBuilder builder) throws KaitaiException {
 		try {
+			streamError.reset();
+			streamOutput.reset();
 			builder.run();
 		} catch (StartupException | TimeoutException | ExternalProcessFailureException e) {
 			throw new KaitaiException(
-				"Fail to execute kaitai command"
+				"Fail to execute kaitai command: "
+					+ streamError.toString(UTF_8)
+					+ streamOutput.toString(UTF_8)
 				, e
 			);
 		}

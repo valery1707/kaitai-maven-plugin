@@ -31,13 +31,14 @@ import static name.valery1707.kaitai.KaitaiUtils.*;
 	, defaultPhase = LifecyclePhase.GENERATE_SOURCES
 )
 public class KaitaiMojo extends AbstractMojo {
+	static final String KAITAI_VERSION = "0.8";
 
 	/**
 	 * Version of <a href="http://kaitai.io/#download">KaiTai</a> library.
 	 *
 	 * @since 0.1.0
 	 */
-	@Parameter(property = "kaitai.version", defaultValue = "0.8")
+	@Parameter(property = "kaitai.version", defaultValue = KAITAI_VERSION)
 	private String version;
 
 	/**
