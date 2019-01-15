@@ -21,7 +21,10 @@ import static java.lang.String.format;
 import static name.valery1707.kaitai.KaitaiUtils.*;
 
 /**
+ * Building Kaitai specifications into Java-classes.
+ *
  * @see <a href="http://maven.apache.org/developers/mojo-api-specification.html">Mojo API Specification</a>
+ * @see <a href="http://doc.kaitai.io/user_guide.html#_invocation">Kaitai compiler documentation</a>
  */
 @Mojo(
 	name = "generate"

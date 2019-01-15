@@ -41,11 +41,11 @@ public class LogWriter extends Writer {
 	public void write(char[] cbuf, int off, int len) {
 		String lines = new String(cbuf, off, len).trim();
 		for (String line : NEW_LINE.split(lines)) {
-			log(line.trim());
+			logImpl(line.trim());
 		}
 	}
 
-	private void log(String line) {
+	private void logImpl(String line) {
 		if (line.isEmpty()) {
 			return;
 		}

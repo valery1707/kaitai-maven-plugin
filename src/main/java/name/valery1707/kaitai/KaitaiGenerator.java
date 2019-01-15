@@ -21,6 +21,15 @@ public class KaitaiGenerator {
 	private final Set<Path> sources = new LinkedHashSet<>();
 	private boolean overwrite = false;
 
+	/**
+	 * Build {@code KaitaiGenerator} with preconfigured state.
+	 *
+	 * @param kaitai      Path to kaitai compiler runner
+	 * @param output      Path to output directory
+	 * @param packageName Package name for Java-classes
+	 * @return New {@code KaitaiGenerator}
+	 * @throws KaitaiException If compiler is not executable or output is not writable
+	 */
 	public static KaitaiGenerator generator(Path kaitai, Path output, String packageName) throws KaitaiException {
 		checkFileIsExecutable(kaitai);
 		checkDirectoryIsWritable(output);
@@ -49,12 +58,26 @@ public class KaitaiGenerator {
 		return unmodifiableSet(sources);
 	}
 
+	/**
+	 * Add path to kaitai specification from {@code Iterable}.
+	 *
+	 * @param source Path to kaitai specification
+	 * @return self
+	 * @throws KaitaiException If path is not readable
+	 */
 	public KaitaiGenerator withSource(Path source) throws KaitaiException {
 		checkFileIsReadable(source);
 		this.sources.add(source);
 		return this;
 	}
 
+	/**
+	 * Add paths to kaitai specification from {@code Iterable}.
+	 *
+	 * @param sources Iterable with paths to kaitai specification
+	 * @return self
+	 * @throws KaitaiException If any path is not readable
+	 */
 	public KaitaiGenerator withSource(Iterable<Path> sources) throws KaitaiException {
 		for (Path source : sources) {
 			withSource(source);
@@ -94,6 +117,13 @@ public class KaitaiGenerator {
 		}
 	}
 
+	/**
+	 * Start generation process.
+	 *
+	 * @param log Logger for messages
+	 * @return Root directory with generated files
+	 * @throws KaitaiException If any exception occurs on compile step
+	 */
 	public Path generate(Logger log) throws KaitaiException {
 		if (!isOverwrite()) {
 			//todo Remove exists file from source
