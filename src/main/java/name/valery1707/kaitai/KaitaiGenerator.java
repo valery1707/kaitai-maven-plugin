@@ -26,6 +26,7 @@ public class KaitaiGenerator {
 	private boolean overwrite = false;
 	private final ByteArrayOutputStream streamError = new ByteArrayOutputStream(256);
 	private final ByteArrayOutputStream streamOutput = new ByteArrayOutputStream(256);
+	private long executionTimeout = 5_000;
 
 	/**
 	 * Build {@code KaitaiGenerator} with preconfigured state.
@@ -108,12 +109,30 @@ public class KaitaiGenerator {
 		return this;
 	}
 
+	public long getExecutionTimeout() {
+		return executionTimeout;
+	}
+
+	public void setExecutionTimeout(long executionTimeout) {
+		this.executionTimeout = executionTimeout;
+	}
+
+	public KaitaiGenerator executionTimeout(long executionTimeout) {
+		setExecutionTimeout(executionTimeout);
+		return this;
+	}
+
 	private ProcBuilder process(Logger log) {
-		return new ProcBuilder(getKaitai().normalize().toAbsolutePath().toString())
+		ProcBuilder builder = new ProcBuilder(getKaitai().normalize().toAbsolutePath().toString())
 			.withErrorStream(new TeeOutputStream(LogWriter.logError(log), streamError))
 			.withOutputStream(new TeeOutputStream(LogWriter.logInfo(log), streamOutput))
-			.withExpectedExitStatuses(0)
-			;
+			.withExpectedExitStatuses(0);
+		if (getExecutionTimeout() < 0) {
+			builder.withNoTimeout();
+		} else {
+			builder.withTimeoutMillis(getExecutionTimeout());
+		}
+		return builder;
 	}
 
 	private void execute(ProcBuilder builder) throws KaitaiException {

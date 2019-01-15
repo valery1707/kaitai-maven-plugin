@@ -4,6 +4,7 @@ import com.github.marschall.memoryfilesystem.MemoryFileSystemBuilder;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
+import org.apache.commons.lang3.SystemUtils;
 import org.buildobjects.process.ExternalProcessFailureException;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -282,5 +283,48 @@ public class KaitaiUtilsTest {
 
 			assertThat(generator.getOutput().resolve("scr")).doesNotExist();
 		}
+	}
+
+	/**
+	 * @return Generator targeted into executable with timeout for 1 second
+	 * @throws IOException     If resource not found
+	 * @throws KaitaiException If resource is invalid
+	 */
+	private KaitaiGenerator testExecutionTimeout() throws IOException, KaitaiException {
+		Path executable = copy(
+			SystemUtils.IS_OS_WINDOWS
+				? "/executable/_timeout.bat"
+				: "/executable/_timeout.sh"
+		);
+		return KaitaiGenerator.generator(executable, executable.getParent(), getClass().getPackage().getName());
+	}
+
+	@Test
+	public void testExecutionTimeout_positiveSuccess() throws IOException, KaitaiException {
+		KaitaiGenerator generator = testExecutionTimeout();
+		generator.executionTimeout(2_000);
+		assertThat(generator.generate(LOG)).isNotNull();
+	}
+
+	@Test
+	public void testExecutionTimeout_positiveFailure() throws IOException, KaitaiException {
+		KaitaiGenerator generator = testExecutionTimeout();
+		generator.executionTimeout(500);
+		try {
+			assertThat(generator.generate(LOG)).isNotNull();
+			fail("Must throw exception");
+		} catch (KaitaiException e) {
+			assertThat(e.getCause())
+				.isInstanceOf(org.buildobjects.process.TimeoutException.class)
+				.hasMessageContaining("timed out after 500ms")
+			;
+		}
+	}
+
+	@Test
+	public void testExecutionTimeout_negativeSuccess() throws IOException, KaitaiException {
+		KaitaiGenerator generator = testExecutionTimeout();
+		generator.executionTimeout(-1);
+		assertThat(generator.generate(LOG)).isNotNull();
 	}
 }

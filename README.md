@@ -38,6 +38,7 @@ See [kaitai-java-demo](https://github.com/valery1707/kaitai-java-demo).
 | excludes        | String[]     | 0.1.0 | Exclude wildcard pattern list.<br><br>**Default**: []                                                                   |
 | output          | java.io.File | 0.1.0 | Target directory for generated Java source files.<br><br>**Default**: `build/generated/kaitai`                          |
 | packageName     | String       | 0.1.0 | Target package for generated Java source files.<br><br>**Default**: Trying to get project's group or `kaitai` otherwise |
+| executionTimeout| Long         | 0.1.3 | Timeout for execution operations.<br><br>**Default**: `5000` |
 
 ### Useful commands
 

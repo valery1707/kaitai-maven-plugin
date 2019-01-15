@@ -3,6 +3,7 @@ Change log for releases.
 # SNAPSHOT
 
 * Propagate `kaitai_compiler` messages as part of plugin's error message
+* Configure timeout for the execution operations
 
 # 0.1.2
 

@@ -115,6 +115,18 @@ public class KaitaiMojo extends AbstractMojo {
 	@Parameter(property = "kaitai.overwrite", defaultValue = "false")
 	private boolean overwrite = false;
 
+	/**
+	 * Specify a timeout in millis for the execution operations.
+	 * If not specified the default is 5 seconds.
+	 *
+	 * <p>
+	 * For disabling timeout use any negative value.
+	 *
+	 * @since 0.1.3
+	 */
+	@Parameter(property = "kaitai.execution.timeout", defaultValue = "5000")
+	private long executionTimeout;
+
 	@Parameter(defaultValue = "${settings}", readonly = true)
 	private Settings settings;
 
@@ -177,6 +189,7 @@ public class KaitaiMojo extends AbstractMojo {
 				.generator(kaitai, output, packageName)
 				.withSource(source)
 				.overwrite(overwrite)
+				.executionTimeout(executionTimeout)
 				.generate(logger);
 		} catch (KaitaiException e) {
 			throw new KaitaiException(
