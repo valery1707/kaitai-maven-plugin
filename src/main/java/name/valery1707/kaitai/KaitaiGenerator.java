@@ -16,6 +16,8 @@ import java.util.Set;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.unmodifiableSet;
 import static name.valery1707.kaitai.KaitaiUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trimToNull;
 
 @SuppressWarnings("WeakerAccess")
 public class KaitaiGenerator {
@@ -27,6 +29,7 @@ public class KaitaiGenerator {
 	private final ByteArrayOutputStream streamError = new ByteArrayOutputStream(256);
 	private final ByteArrayOutputStream streamOutput = new ByteArrayOutputStream(256);
 	private long executionTimeout = 5_000;
+	private String fromFileClass;
 
 	/**
 	 * Build {@code KaitaiGenerator} with preconfigured state.
@@ -109,16 +112,61 @@ public class KaitaiGenerator {
 		return this;
 	}
 
+	/**
+	 * Get configured execution timeout value.
+	 *
+	 * @return Current execution timeout value
+	 */
 	public long getExecutionTimeout() {
 		return executionTimeout;
 	}
 
+	/**
+	 * Set execution timeout value.
+	 *
+	 * @param executionTimeout New value
+	 */
 	public void setExecutionTimeout(long executionTimeout) {
 		this.executionTimeout = executionTimeout;
 	}
 
+	/**
+	 * Set execution timeout value.
+	 *
+	 * @param executionTimeout New value
+	 * @return self
+	 */
 	public KaitaiGenerator executionTimeout(long executionTimeout) {
 		setExecutionTimeout(executionTimeout);
+		return this;
+	}
+
+	/**
+	 * Get configured classname with custom KaitaiStream implementations.
+	 *
+	 * @return Configured classname with custom KaitaiStream implementations
+	 */
+	public String getFromFileClass() {
+		return fromFileClass;
+	}
+
+	/**
+	 * Set new classname with custom KaitaiStream implementations.
+	 *
+	 * @param fromFileClass Classname with custom KaitaiStream implementations
+	 */
+	public void setFromFileClass(String fromFileClass) {
+		this.fromFileClass = trimToNull(fromFileClass);
+	}
+
+	/**
+	 * Set new classname with custom KaitaiStream implementations.
+	 *
+	 * @param fromFileClass Classname with custom KaitaiStream implementations
+	 * @return self
+	 */
+	public KaitaiGenerator fromFileClass(String fromFileClass) {
+		setFromFileClass(fromFileClass);
 		return this;
 	}
 
@@ -172,6 +220,9 @@ public class KaitaiGenerator {
 			.withArgs("--target", "java")
 			.withArgs("--outdir", getOutput().normalize().toFile().getAbsolutePath())
 			.withArgs("--java-package", getPackageName());
+		if (isNotBlank(getFromFileClass())) {
+			builder.withArgs("--java-from-file-class", getFromFileClass());
+		}
 
 		for (Path source : getSources()) {
 			builder.withArg(source.normalize().toFile().getAbsolutePath());

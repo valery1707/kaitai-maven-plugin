@@ -13,13 +13,11 @@ import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystem;
 import java.nio.file.*;
 import java.nio.file.attribute.PosixFilePermission;
 import java.security.DigestOutputStream;
@@ -59,6 +57,12 @@ public class KaitaiUtilsTest {
 
 	private Path copy(String resource) throws IOException {
 		return copy(resource, temporaryFolder.newFolder().toPath().resolve(getName(resource)));
+	}
+
+	private String readToString(Path source) throws IOException {
+		try (Reader reader = Files.newBufferedReader(source, UTF_8)) {
+			return IOUtils.toString(reader);
+		}
 	}
 
 	private void testExecutable(FileSystem fs) throws KaitaiException, IOException {
@@ -326,5 +330,29 @@ public class KaitaiUtilsTest {
 		KaitaiGenerator generator = testExecutionTimeout();
 		generator.executionTimeout(-1);
 		assertThat(generator.generate(LOG)).isNotNull();
+	}
+
+	@Test
+	public void testOption_fromFileClass() throws URISyntaxException, IOException, KaitaiException {
+		Path source = findIt()
+			.resolve("it-source-exist/src/main/resources/kaitai/ico.ksy");
+		String fromFileClassName = "TestStream";
+		String fromFileClass = "name.valery1707.kaitai.test" + "." + fromFileClassName;
+		KaitaiGenerator generator = generator(source)
+			.fromFileClass(fromFileClass);
+		Path target = generator.generate(LOG);
+		assertThat(target).isDirectory().hasFileName("src");
+		Path pkg = target.resolve(generator.getPackageName().replace('.', '/'));
+		assertThat(pkg).isDirectory();
+		for (Path src : generator.getSources()) {
+			String kaitaiName = src.getFileName().toString();
+			String javaName = capitalize(removeExtension(kaitaiName) + ".java");
+			Path javaFile = pkg.resolve(javaName);
+			assertThat(javaFile).isRegularFile().isReadable();
+			assertThat(readToString(javaFile))
+				.contains(fromFileClass)
+				.contains("new " + fromFileClassName + "(")
+			;
+		}
 	}
 }

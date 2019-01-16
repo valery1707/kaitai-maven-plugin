@@ -127,6 +127,14 @@ public class KaitaiMojo extends AbstractMojo {
 	@Parameter(property = "kaitai.execution.timeout", defaultValue = "5000")
 	private long executionTimeout;
 
+	/**
+	 * Classname of custom KaitaiStream implementation which will be used in static builder {@code fromFile(...)}.
+	 *
+	 * @since 0.1.3
+	 */
+	@Parameter(property = "kaitai.fromFileClass")
+	private String fromFileClass;
+
 	@Parameter(defaultValue = "${settings}", readonly = true)
 	private Settings settings;
 
@@ -190,6 +198,7 @@ public class KaitaiMojo extends AbstractMojo {
 				.withSource(source)
 				.overwrite(overwrite)
 				.executionTimeout(executionTimeout)
+				.fromFileClass(fromFileClass)
 				.generate(logger);
 		} catch (KaitaiException e) {
 			throw new KaitaiException(
