@@ -30,6 +30,7 @@ public class KaitaiGenerator {
 	private final ByteArrayOutputStream streamOutput = new ByteArrayOutputStream(256);
 	private long executionTimeout = 5_000;
 	private String fromFileClass;
+	private Boolean opaqueTypes;
 
 	/**
 	 * Build {@code KaitaiGenerator} with preconfigured state.
@@ -170,6 +171,35 @@ public class KaitaiGenerator {
 		return this;
 	}
 
+	/**
+	 * Get opaque types mode.
+	 *
+	 * @return Opaque types mode
+	 */
+	public Boolean getOpaqueTypes() {
+		return opaqueTypes;
+	}
+
+	/**
+	 * Set opaque types mode.
+	 *
+	 * @param opaqueTypes Opaque types mode
+	 */
+	public void setOpaqueTypes(Boolean opaqueTypes) {
+		this.opaqueTypes = opaqueTypes;
+	}
+
+	/**
+	 * Set opaque types mode.
+	 *
+	 * @param opaqueTypes Opaque types mode
+	 * @return self
+	 */
+	public KaitaiGenerator opaqueTypes(Boolean opaqueTypes) {
+		setOpaqueTypes(opaqueTypes);
+		return this;
+	}
+
 	private ProcBuilder process(Logger log) {
 		ProcBuilder builder = new ProcBuilder(getKaitai().normalize().toAbsolutePath().toString())
 			.withErrorStream(new TeeOutputStream(LogWriter.logError(log), streamError))
@@ -222,6 +252,9 @@ public class KaitaiGenerator {
 			.withArgs("--java-package", getPackageName());
 		if (isNotBlank(getFromFileClass())) {
 			builder.withArgs("--java-from-file-class", getFromFileClass());
+		}
+		if (getOpaqueTypes() != null) {
+			builder.withArgs("--opaque-types", getOpaqueTypes().toString());
 		}
 
 		for (Path source : getSources()) {

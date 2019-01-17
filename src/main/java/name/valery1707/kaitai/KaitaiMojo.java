@@ -135,6 +135,15 @@ public class KaitaiMojo extends AbstractMojo {
 	@Parameter(property = "kaitai.fromFileClass")
 	private String fromFileClass;
 
+	/**
+	 * Configure compiler to usage opaque (external) types.
+	 *
+	 * @see <a href="https://doc.kaitai.io/user_guide.html#opaque-types">Kaitai documentation</a>
+	 * @since 0.1.3
+	 */
+	@Parameter(property = "kaitai.opaqueTypes")
+	private Boolean opaqueTypes;
+
 	@Parameter(defaultValue = "${settings}", readonly = true)
 	private Settings settings;
 
@@ -199,6 +208,7 @@ public class KaitaiMojo extends AbstractMojo {
 				.overwrite(overwrite)
 				.executionTimeout(executionTimeout)
 				.fromFileClass(fromFileClass)
+				.opaqueTypes(opaqueTypes)
 				.generate(logger);
 		} catch (KaitaiException e) {
 			throw new KaitaiException(

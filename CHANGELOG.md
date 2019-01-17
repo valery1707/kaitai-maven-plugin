@@ -5,6 +5,7 @@ Change log for releases.
 * Propagate `kaitai_compiler` messages as part of plugin's error message
 * Configure timeout for the execution operations
 * Configure custom KaitaiStream implementations for static builder `fromFile(...)`
+* Allow use opaque (external) types in ksy
 
 # 0.1.2
 

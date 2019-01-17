@@ -4,6 +4,7 @@ import com.github.marschall.memoryfilesystem.MemoryFileSystemBuilder;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.buildobjects.process.ExternalProcessFailureException;
 import org.junit.Ignore;
@@ -34,7 +35,6 @@ import static name.valery1707.kaitai.KaitaiMojo.KAITAI_VERSION;
 import static name.valery1707.kaitai.KaitaiUtils.*;
 import static org.apache.commons.io.FilenameUtils.getName;
 import static org.apache.commons.io.FilenameUtils.removeExtension;
-import static org.apache.commons.lang3.StringUtils.capitalize;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.fail;
@@ -63,6 +63,14 @@ public class KaitaiUtilsTest {
 		try (Reader reader = Files.newBufferedReader(source, UTF_8)) {
 			return IOUtils.toString(reader);
 		}
+	}
+
+	private String capitalize(String source) {
+		String[] parts = StringUtils.split(source, '_');
+		for (int i = 0; i < parts.length; i++) {
+			parts[i] = StringUtils.capitalize(parts[i]);
+		}
+		return StringUtils.join(parts);
 	}
 
 	private void testExecutable(FileSystem fs) throws KaitaiException, IOException {
@@ -260,7 +268,7 @@ public class KaitaiUtilsTest {
 		assertThat(pkg).isDirectory();
 		for (Path src : generator.getSources()) {
 			String kaitaiName = src.getFileName().toString();
-			String javaName = capitalize(removeExtension(kaitaiName) + ".java");
+			String javaName = capitalize(removeExtension(kaitaiName)) + ".java";
 			assertThat(pkg.resolve(javaName)).isRegularFile();
 		}
 	}
@@ -346,13 +354,59 @@ public class KaitaiUtilsTest {
 		assertThat(pkg).isDirectory();
 		for (Path src : generator.getSources()) {
 			String kaitaiName = src.getFileName().toString();
-			String javaName = capitalize(removeExtension(kaitaiName) + ".java");
+			String javaName = capitalize(removeExtension(kaitaiName)) + ".java";
 			Path javaFile = pkg.resolve(javaName);
 			assertThat(javaFile).isRegularFile().isReadable();
 			assertThat(readToString(javaFile))
 				.contains(fromFileClass)
 				.contains("new " + fromFileClassName + "(")
 			;
+		}
+	}
+
+	@Test
+	public void testOption_opaqueTypes_enabled() throws URISyntaxException, IOException, KaitaiException {
+		Path source = findIt()
+			.resolve("it-withOption-opaqueTypes/src/main/resources/kaitai/doc_container.ksy");
+		KaitaiGenerator generator = generator(source)
+			.opaqueTypes(true);
+		Path target = generator.generate(LOG);
+		assertThat(target).isDirectory().hasFileName("src");
+		Path pkg = target.resolve(generator.getPackageName().replace('.', '/'));
+		assertThat(pkg).isDirectory();
+		for (Path src : generator.getSources()) {
+			String kaitaiName = src.getFileName().toString();
+			String javaName = capitalize(removeExtension(kaitaiName)) + ".java";
+			Path javaFile = pkg.resolve(javaName);
+			assertThat(javaFile).isRegularFile().isReadable();
+			assertThat(readToString(javaFile))
+				.contains("new CustomEncryptedObject(this._io)")
+			;
+		}
+	}
+
+	@Test
+	public void testOption_opaqueTypes_disabled() throws URISyntaxException, IOException, KaitaiException {
+		Path source = findIt()
+			.resolve("it-withOption-opaqueTypes/src/main/resources/kaitai/doc_container.ksy");
+		KaitaiGenerator generator = generator(source)
+			.opaqueTypes(false);
+		try {
+			generator.generate(LOG);
+			fail("Must generate exception because of problems in specification");
+		} catch (KaitaiException e) {
+			assertThat(e)
+				.hasMessageContaining("/seq/0: unable to find type 'custom_encrypted_object', searching from doc_container")
+			;
+			assertThat(e.getMessage()).doesNotContain(KAITAI_VERSION);
+
+			assertThat(e.getCause())
+				.isInstanceOf(ExternalProcessFailureException.class)
+				.hasMessageContaining("Stderr unavailable as it has been consumed by user provided stream.")
+				.hasMessageContaining("returned 2 after")
+			;
+
+			assertThat(generator.getOutput().resolve("scr")).doesNotExist();
 		}
 	}
 }
