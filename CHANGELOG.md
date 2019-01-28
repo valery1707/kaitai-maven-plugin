@@ -2,6 +2,8 @@ Change log for releases.
 
 # SNAPSHOT
 
+# 0.1.4
+
 * Can work with `commons-io:commons-io:2.4`
 
 # 0.1.3
