@@ -221,8 +221,8 @@ public class KaitaiGenerator {
 		} catch (StartupException | TimeoutException | ExternalProcessFailureException e) {
 			throw new KaitaiException(
 				"Fail to execute kaitai command: "
-					+ streamError.toString(UTF_8)
-					+ streamOutput.toString(UTF_8)
+					+ new String(streamError.toByteArray(), UTF_8)
+					+ new String(streamOutput.toByteArray(), UTF_8)
 				, e
 			);
 		}

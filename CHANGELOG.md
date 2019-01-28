@@ -2,6 +2,8 @@ Change log for releases.
 
 # SNAPSHOT
 
+* Can work with `commons-io:commons-io:2.4`
+
 # 0.1.3
 
 * Propagate `kaitai_compiler` messages as part of plugin's error message
