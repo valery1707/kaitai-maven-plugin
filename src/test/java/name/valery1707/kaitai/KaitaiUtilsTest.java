@@ -22,9 +22,7 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -33,6 +31,7 @@ import static name.valery1707.kaitai.KaitaiMojo.KAITAI_VERSION;
 import static name.valery1707.kaitai.KaitaiUtils.*;
 import static org.apache.commons.io.FilenameUtils.getName;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.slf4j.helpers.NOPLogger.NOP_LOGGER;
 
@@ -92,6 +91,280 @@ public class KaitaiUtilsTest {
 				new File(".").toPath().resolve("src/test/java/name/valery1707/kaitai/KaitaiUtilsTest.java")
 			)
 		;
+	}
+
+	@Test
+	public void testCreateTempDirectory() throws KaitaiException {
+		Path temp = createTempDirectory("temp-");
+		assertThat(temp)
+			.exists()
+			.isDirectory()
+			.isReadable()
+		;
+		assertThat(temp.toFile().listFiles()).isNotNull().isEmpty();
+	}
+
+	private void testDelete(Path path) throws KaitaiException {
+		assertThat(path).exists();
+		delete(path);
+		assertThat(path).doesNotExist();
+	}
+
+	private void testDelete_root(FileSystem fs) {
+		try {
+			testDelete(fs.getRootDirectories().iterator().next());
+			fail("Must generate exception because root can't be deleted");
+		} catch (KaitaiException e) {
+			assertThat(e).hasMessageStartingWith("Fail to delete: ");
+			assertThat(e.getCause()).isNotNull().hasMessageContaining("can not delete root");
+		}
+	}
+
+	@Test
+	public void testDelete_root_Linux() throws IOException {
+		FileSystem fs = MemoryFileSystemBuilder.newLinux().build();
+		testDelete_root(fs);
+	}
+
+	@Test
+	public void testDelete_root_Windows() throws IOException {
+		FileSystem fs = MemoryFileSystemBuilder.newWindows().build();
+		testDelete_root(fs);
+	}
+
+	@Test
+	public void testDelete_file_Linux() throws IOException, KaitaiException {
+		FileSystem fs = MemoryFileSystemBuilder.newLinux().build();
+		testDelete(Files.createFile(fs.getPath(".", "temp.file")));
+	}
+
+	@Test
+	public void testDelete_file_Windows() throws IOException, KaitaiException {
+		FileSystem fs = MemoryFileSystemBuilder.newWindows().build();
+		testDelete(Files.createFile(fs.getPath(".", "temp.file")));
+	}
+
+	private void testDelete_fileLocked(FileSystem fs) throws IOException {
+		Path locked = Files.createFile(fs.getPath(".", "temp.file"));
+		try (InputStream ignored = Files.newInputStream(locked)) {
+			testDelete(locked);
+			fail("Must generate exception because file is locked");
+		} catch (KaitaiException e) {
+			assertThat(e).hasMessageStartingWith("Fail to delete:").hasMessageEndingWith(locked.getFileName().toString());
+			assertThat(e.getCause()).hasMessageContaining("file still open");
+		}
+	}
+
+	@Test
+	public void testDelete_fileLocked_Linux() throws IOException {
+		FileSystem fs = MemoryFileSystemBuilder.newLinux().build();
+		testDelete_fileLocked(fs);
+	}
+
+	@Test
+	public void testDelete_fileLocked_Windows() throws IOException {
+		FileSystem fs = MemoryFileSystemBuilder.newWindows().build();
+		testDelete_fileLocked(fs);
+	}
+
+	private Path createPathTree(Path root, Map<String[], Character> content) throws IOException {
+		for (Map.Entry<String[], Character> entry : content.entrySet()) {
+			String[] paths = entry.getKey();
+			char type = entry.getValue();
+			Path path = root;
+			for (String part : paths) {
+				path = path.resolve(part);
+			}
+			switch (type) {
+				case 'f':
+					Files.createFile(path);
+					break;
+				case 'd':
+					Files.createDirectory(path);
+					break;
+				default:
+					throw new IllegalArgumentException("Invalid path type '" + type + "' for:" + path);
+			}
+		}
+		return root;
+	}
+
+	private static final Map<String[], Character> directorySimple = new LinkedHashMap<String[], Character>() {{
+		put(new String[]{"nested1.file"}, 'f');
+		put(new String[]{"nested1-path"}, 'd');
+		put(new String[]{"nested1-path", "nested4.file"}, 'f');
+		put(new String[]{"nested1-path", "nested5.file"}, 'f');
+		put(new String[]{"nested1-path", "nested6.file"}, 'f');
+		put(new String[]{"nested2.file"}, 'f');
+		put(new String[]{"nested2-path"}, 'd');
+		put(new String[]{"nested2-path", "nested7.file"}, 'f');
+		put(new String[]{"nested2-path", "nested8.file"}, 'f');
+		put(new String[]{"nested2-path", "nested9.file"}, 'f');
+		put(new String[]{"nested3.file"}, 'f');
+	}};
+
+	private void testDelete_dirFilled(Path root, Map<String[], Character> content) throws KaitaiException, IOException {
+		testDelete(createPathTree(root, content));
+	}
+
+	@Test
+	public void testDelete_dirEmpty_Linux() throws IOException, KaitaiException {
+		FileSystem fs = MemoryFileSystemBuilder.newLinux().build();
+		testDelete_dirFilled(
+			Files.createDirectory(fs.getPath(".", "temp-dir")),
+			Collections.<String[], Character>emptyMap()
+		);
+	}
+
+	@Test
+	public void testDelete_dirEmpty_Windows() throws IOException, KaitaiException {
+		FileSystem fs = MemoryFileSystemBuilder.newWindows().build();
+		testDelete_dirFilled(
+			Files.createDirectory(fs.getPath(".", "temp-dir")),
+			Collections.<String[], Character>emptyMap()
+		);
+	}
+
+	@Test
+	public void testDelete_dirFilled_Linux() throws IOException, KaitaiException {
+		FileSystem fs = MemoryFileSystemBuilder.newLinux().build();
+		testDelete_dirFilled(
+			Files.createDirectory(fs.getPath(".", "temp-dir")),
+			directorySimple
+		);
+	}
+
+	@Test
+	public void testDelete_dirFilled_Windows() throws IOException, KaitaiException {
+		FileSystem fs = MemoryFileSystemBuilder.newWindows().build();
+		testDelete_dirFilled(
+			Files.createDirectory(fs.getPath(".", "temp-dir")),
+			directorySimple
+		);
+	}
+
+	private void testDelete_dirLocked(FileSystem fs) throws IOException {
+		Path root = Files.createDirectory(fs.getPath(".", "temp-dir"));
+		try (InputStream ignored = Files.newInputStream(Files.createFile(root.resolve("test.lock")))) {
+			testDelete_dirFilled(
+				root,
+				directorySimple
+			);
+			fail("Must generate exception because directory contains locked file");
+		} catch (KaitaiException e) {
+			assertThat(e).hasMessageStartingWith("Fail to delete:").hasMessageEndingWith(root.getFileName().toString());
+			assertThat(e.getCause()).hasMessageContaining("file still open");
+		}
+	}
+
+	@Test
+	public void testDelete_dirLocked_Linux() throws IOException {
+		FileSystem fs = MemoryFileSystemBuilder.newLinux().build();
+		testDelete_dirLocked(fs);
+	}
+
+	@Test
+	public void testDelete_dirLocked_Windows() throws IOException {
+		FileSystem fs = MemoryFileSystemBuilder.newWindows().build();
+		testDelete_dirLocked(fs);
+	}
+
+	private void testMoveSingle_absent(FileSystem fs) {
+		try {
+			move(fs.getPath(".", "absent-1.file"), fs.getPath(".", "absent-2.file"));
+			fail("Must generate exception because source path is absent");
+		} catch (KaitaiException e) {
+			assertThat(e).hasMessageStartingWith("Fail to move").hasMessageContaining("absent-1.file").hasMessageContaining("absent-2.file");
+			assertThat(e.getCause()).hasMessageContaining("absent-1.file");
+		}
+	}
+
+	@Test
+	public void testMoveSingle_absent_Linux() throws IOException {
+		FileSystem fs = MemoryFileSystemBuilder.newLinux().build();
+		testMoveSingle_absent(fs);
+	}
+
+	@Test
+	public void testMoveSingle_absent_Windows() throws IOException {
+		FileSystem fs = MemoryFileSystemBuilder.newWindows().build();
+		testMoveSingle_absent(fs);
+	}
+
+	private void testMoveSingle_exists2absent(FileSystem fs) throws KaitaiException, IOException {
+		byte[] content = IOUtils.toByteArray(getClass().getResourceAsStream("/executable/_timeout.bat"));
+		Path source = Files.write(fs.getPath(".", "source.file"), content);
+		Path target = fs.getPath(".", "target.file");
+		assertThat(source).exists().hasBinaryContent(content);
+		assertThat(target).doesNotExist();
+		move(source, target);
+		assertThat(source).doesNotExist();
+		assertThat(target).exists().hasBinaryContent(content);
+	}
+
+	@Test
+	public void testMoveSingle_exists2absent_Linux() throws IOException, KaitaiException {
+		FileSystem fs = MemoryFileSystemBuilder.newLinux().build();
+		testMoveSingle_exists2absent(fs);
+	}
+
+	@Test
+	public void testMoveSingle_exists2absent_Windows() throws IOException, KaitaiException {
+		FileSystem fs = MemoryFileSystemBuilder.newWindows().build();
+		testMoveSingle_exists2absent(fs);
+	}
+
+	private void testMoveSingle_exists2exists(FileSystem fs) throws KaitaiException, IOException {
+		byte[] contentS = IOUtils.toByteArray(getClass().getResourceAsStream("/executable/_timeout.bat"));
+		byte[] contentT = IOUtils.toByteArray(getClass().getResourceAsStream("/executable/_timeout.sh"));
+		Path source = Files.write(fs.getPath(".", "source.file"), contentS);
+		Path target = Files.write(fs.getPath(".", "target.file"), contentT);
+		assertThat(source).exists().hasBinaryContent(contentS);
+		assertThat(target).exists().hasBinaryContent(contentT);
+		move(source, target);
+		assertThat(source).doesNotExist();
+		assertThat(target).exists().hasBinaryContent(contentS);
+	}
+
+	@Test
+	public void testMoveSingle_exists2exists_Linux() throws IOException, KaitaiException {
+		FileSystem fs = MemoryFileSystemBuilder.newLinux().build();
+		testMoveSingle_exists2exists(fs);
+	}
+
+	@Test
+	public void testMoveSingle_exists2exists_Windows() throws IOException, KaitaiException {
+		FileSystem fs = MemoryFileSystemBuilder.newWindows().build();
+		testMoveSingle_exists2exists(fs);
+	}
+
+	private void testMoveCollection_exists2absent(FileSystem fs) throws IOException, KaitaiException {
+		Path source = createPathTree(Files.createDirectory(fs.getPath(".", "source")), directorySimple);
+		Path target = fs.getPath(".", "target");
+		assertThat(source).exists();
+		assertThat(target).doesNotExist();
+		move(source, scanFiles(source, new String[]{"*.file"}, new String[0]), target);
+		//Source still has some empty directories inside itself
+		assertThat(source).exists();
+		assertThat(scanFiles(source, new String[]{"*"}, new String[0]))
+			.isEmpty()
+		;
+		assertThat(target).exists();
+		assertThat(scanFiles(target, new String[]{"*"}, new String[0]))
+			.hasSize(9)
+		;
+	}
+
+	@Test
+	public void testMoveCollection_exists2absent_Linux() throws IOException, KaitaiException {
+		FileSystem fs = MemoryFileSystemBuilder.newLinux().build();
+		testMoveCollection_exists2absent(fs);
+	}
+
+	@Test
+	public void testMoveCollection_exists2absent_Windows() throws IOException, KaitaiException {
+		FileSystem fs = MemoryFileSystemBuilder.newWindows().build();
+		testMoveCollection_exists2absent(fs);
 	}
 
 	@Test

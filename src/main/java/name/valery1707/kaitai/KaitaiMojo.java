@@ -92,6 +92,19 @@ public class KaitaiMojo extends AbstractMojo {
 	private File output;
 
 	/**
+	 * Kaitai compiler start creating directory structure for packages not exact inside {@link #output output path} but inside
+	 * directory {@code src} which it creates by itself.
+	 *
+	 * <p>
+	 * This parameter activate workaround which move root of packages directory structure exact inside configured {@link #output output path}.
+	 *
+	 * @see #output
+	 * @since 0.1.5
+	 */
+	@Parameter(property = "kaitai.exactOutput", defaultValue = "false")
+	private boolean exactOutput;
+
+	/**
 	 * Target package for generated Java source files.
 	 *
 	 * @since 0.1.0
@@ -204,6 +217,7 @@ public class KaitaiMojo extends AbstractMojo {
 			.generator(kaitai, output, packageName)
 			.withSource(source)
 			.overwrite(overwrite)
+			.exactOutput(exactOutput)
 			.executionTimeout(executionTimeout)
 			.fromFileClass(fromFileClass)
 			.opaqueTypes(opaqueTypes)

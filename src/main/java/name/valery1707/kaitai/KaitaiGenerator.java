@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -26,6 +27,7 @@ public class KaitaiGenerator {
 	private final String packageName;
 	private final Set<Path> sources = new LinkedHashSet<>();
 	private boolean overwrite = false;
+	private boolean exactOutput = false;
 	private final ByteArrayOutputStream streamError = new ByteArrayOutputStream(256);
 	private final ByteArrayOutputStream streamOutput = new ByteArrayOutputStream(256);
 	private long executionTimeout = 5_000;
@@ -109,7 +111,20 @@ public class KaitaiGenerator {
 	}
 
 	public KaitaiGenerator overwrite(boolean overwrite) {
-		this.overwrite = overwrite;
+		setOverwrite(overwrite);
+		return this;
+	}
+
+	public boolean isExactOutput() {
+		return exactOutput;
+	}
+
+	public void setExactOutput(boolean exactOutput) {
+		this.exactOutput = exactOutput;
+	}
+
+	public KaitaiGenerator exactOutput(boolean exactOutput) {
+		setExactOutput(exactOutput);
 		return this;
 	}
 
@@ -246,9 +261,14 @@ public class KaitaiGenerator {
 			.withArg("--version")
 		);
 
+		Path output = getOutput().normalize();
+		if (isExactOutput()) {
+			output = createTempDirectory("kaitai-" + getPackageName());
+		}
+
 		ProcBuilder builder = process(log)
 			.withArgs("--target", "java")
-			.withArgs("--outdir", getOutput().normalize().toFile().getAbsolutePath())
+			.withArgs("--outdir", output.toFile().getAbsolutePath())
 			.withArgs("--java-package", getPackageName());
 		if (isNotBlank(getFromFileClass())) {
 			builder.withArgs("--java-from-file-class", getFromFileClass());
@@ -263,6 +283,15 @@ public class KaitaiGenerator {
 
 		log.info("Kaitai: generate");
 		execute(builder);
-		return getOutput().resolve("src");
+		output = output.resolve("src");
+		if (isExactOutput()) {
+			Path root = getOutput();
+			List<Path> generated = scanFiles(output, new String[]{"*"}, new String[0]);
+			move(output, generated, root);
+			delete(output);
+			return root;
+		} else {
+			return output;
+		}
 	}
 }
