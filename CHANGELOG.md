@@ -2,6 +2,8 @@ Change log for releases.
 
 # SNAPSHOT
 
+* Allow to move root of packages directory structure exact inside configured output path
+
 # 0.1.4
 
 * Can work with `commons-io:commons-io:2.4`

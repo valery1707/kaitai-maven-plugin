@@ -92,6 +92,19 @@ public class KaitaiMojo extends AbstractMojo {
 	private File output;
 
 	/**
+	 * Kaitai compiler start creating directory structure for packages not exact inside {@link #output output path} but inside
+	 * directory {@code src} which it creates by itself.
+	 *
+	 * <p>
+	 * This parameter activate workaround which move root of packages directory structure exact inside configured {@link #output output path}.
+	 *
+	 * @see #output
+	 * @since 0.1.5
+	 */
+	@Parameter(property = "kaitai.exactOutput", defaultValue = "false")
+	private boolean exactOutput;
+
+	/**
 	 * Target package for generated Java source files.
 	 *
 	 * @since 0.1.0
@@ -160,7 +173,7 @@ public class KaitaiMojo extends AbstractMojo {
 		try {
 			executeInt();
 		} catch (KaitaiException e) {
-			throw new MojoExecutionException(e.getMessage(), e.getCause());
+			throw new MojoExecutionException(e.getMessage(), e);
 		}
 	}
 
@@ -200,22 +213,15 @@ public class KaitaiMojo extends AbstractMojo {
 
 		//Generate Java sources
 		Path output = mkdirs(this.output.toPath());
-		Path generatedRoot;
-		try {
-			generatedRoot = KaitaiGenerator
-				.generator(kaitai, output, packageName)
-				.withSource(source)
-				.overwrite(overwrite)
-				.executionTimeout(executionTimeout)
-				.fromFileClass(fromFileClass)
-				.opaqueTypes(opaqueTypes)
-				.generate(logger);
-		} catch (KaitaiException e) {
-			throw new KaitaiException(
-				"Fail to generate Java files"
-				, e
-			);
-		}
+		Path generatedRoot = KaitaiGenerator
+			.generator(kaitai, output, packageName)
+			.withSource(source)
+			.overwrite(overwrite)
+			.exactOutput(exactOutput)
+			.executionTimeout(executionTimeout)
+			.fromFileClass(fromFileClass)
+			.opaqueTypes(opaqueTypes)
+			.generate(logger);
 
 		//Add generated directory into Maven's build scope
 		project.addCompileSourceRoot(generatedRoot.normalize().toFile().getAbsolutePath());

@@ -37,6 +37,7 @@ See [kaitai-java-demo](https://github.com/valery1707/kaitai-java-demo).
 | includes        | String[]     | 0.1.0 | Include wildcard pattern list.<br><br>**Default**: ["*.ksy"]                                                            |
 | excludes        | String[]     | 0.1.0 | Exclude wildcard pattern list.<br><br>**Default**: []                                                                   |
 | output          | java.io.File | 0.1.0 | Target directory for generated Java source files.<br><br>**Default**: `build/generated/kaitai`                          |
+| exactOutput     | Boolean      | 0.1.5 | Move root of packages directory structure exact inside configured output path and remove `src` item.<br><br>**Default**: `false`|
 | packageName     | String       | 0.1.0 | Target package for generated Java source files.<br><br>**Default**: Trying to get project's group or `kaitai` otherwise |
 | executionTimeout| Long         | 0.1.3 | Timeout for execution operations.<br><br>**Default**: `5000` |
 | fromFileClass   | String       | 0.1.3 | Classname with custom KaitaiStream implementations for static builder `fromFile(...)`|

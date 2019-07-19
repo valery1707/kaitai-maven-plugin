@@ -7,14 +7,12 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 
-import java.io.FileFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.*;
 import java.util.zip.ZipEntry;
@@ -103,7 +101,7 @@ public final class KaitaiUtils {
 	 */
 	public static List<Path> scanFiles(Path root, String[] includes, String[] excludes) throws KaitaiException {
 		checkDirectoryIsReadable(root);
-		FileFilter filter = FileFilterUtils.and(
+		FilenameFilter filter = FileFilterUtils.and(
 			new WildcardFileFilter(includes)
 			, FileFilterUtils.notFileFilter(new WildcardFileFilter(excludes))
 		);
@@ -161,33 +159,107 @@ public final class KaitaiUtils {
 		return target;
 	}
 
-	private static void delete(Path path) throws KaitaiException {
+	/**
+	 * Create unique directory inside path {@code java.io.tmpdir} on default FileSystem.
+	 *
+	 * @param prefix     Prefix for name
+	 * @param attributes Attributes for created directory
+	 * @return Path to created directory
+	 * @throws KaitaiException If directory can not be created
+	 */
+	public static Path createTempDirectory(String prefix, FileAttribute<?>... attributes) throws KaitaiException {
+		try {
+			return Files.createTempDirectory(prefix, attributes);
+		} catch (IOException e) {
+			throw new KaitaiException(
+				"Fail to create temp directory"
+				, e
+			);
+		}
+	}
+
+	/**
+	 * Remove path: file or entry directory.
+	 *
+	 * @param path Path for delete
+	 * @throws KaitaiException If directory/files can not be deleted
+	 */
+	public static void delete(Path path) throws KaitaiException {
 		if (!Files.exists(path)) {
 			return;
 		}
 		try {
-			Files.delete(path);
+			//todo Symbolic
+			if (Files.isRegularFile(path)) {
+				Files.delete(path);
+			} else if (Files.isDirectory(path)) {
+				Files.walkFileTree(
+					path,
+					new SimpleFileVisitor<Path>() {
+						@Override
+						public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+							Files.delete(file);
+							return FileVisitResult.CONTINUE;
+						}
+
+						@Override
+						public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+							if (exc != null) throw exc;
+							Files.delete(dir);
+							return FileVisitResult.CONTINUE;
+						}
+					}
+				);
+			}
 		} catch (IOException e) {
 			throw new KaitaiException(format(
 				"Fail to delete: %s"
-				, path.normalize().toFile().getAbsolutePath()
+				, path.normalize().toAbsolutePath()
 			)
 				, e
 			);
 		}
 	}
 
-	private static void move(Path source, Path target) throws KaitaiException {
+	/**
+	 * Move {@code source} into {@code target} with replace exists.
+	 *
+	 * @param source Source path
+	 * @param target Target path
+	 * @throws KaitaiException If path can not be moved
+	 */
+	public static void move(Path source, Path target) throws KaitaiException {
 		try {
-			Files.move(source, target, StandardCopyOption.ATOMIC_MOVE);
+			Files.move(source, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
 			throw new KaitaiException(format(
 				"Fail to move '%s' into '%s'"
-				, source.normalize().toFile().getAbsolutePath()
-				, target.normalize().toFile().getAbsolutePath()
+				, source.normalize().toAbsolutePath()
+				, target.normalize().toAbsolutePath()
 			)
 				, e
 			);
+		}
+	}
+
+	/**
+	 * Move all paths from {@code items} which are inside {@code sourceRoot} into {@code targetRoot}.
+	 *
+	 * @param sourceRoot Source root directory
+	 * @param items      Paths for moving
+	 * @param targetRoot Target root directory
+	 * @throws KaitaiException If some path can not be moved
+	 */
+	public static void move(Path sourceRoot, Collection<Path> items, Path targetRoot) throws KaitaiException {
+		sourceRoot = sourceRoot.toAbsolutePath().normalize();
+		for (Path source : items) {
+			Path target = targetRoot.resolve(sourceRoot.relativize(source));
+			mkdirs(target.getParent());
+			if (Files.isRegularFile(source)) {
+				move(source, target);
+			} else {
+				mkdirs(target);
+			}
 		}
 	}
 
@@ -366,17 +438,17 @@ public final class KaitaiUtils {
 	}
 
 	private static class FilterFileVisitor extends SimpleFileVisitor<Path> {
-		private final FileFilter filter;
+		private final FilenameFilter filter;
 		private final List<Path> target;
 
-		private FilterFileVisitor(FileFilter filter, List<Path> target) {
+		private FilterFileVisitor(FilenameFilter filter, List<Path> target) {
 			this.filter = filter;
 			this.target = target;
 		}
 
 		@Override
 		public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-			if (filter.accept(file.toFile())) {
+			if (filter.accept(null, file.getFileName().toString())) {
 				target.add(file.normalize().toAbsolutePath());
 			}
 			return FileVisitResult.CONTINUE;
