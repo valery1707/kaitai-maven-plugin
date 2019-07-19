@@ -2,6 +2,8 @@ Change log for releases.
 
 # SNAPSHOT
 
+# 0.1.5
+
 * Allow to move root of packages directory structure exact inside configured output path
 
 # 0.1.4
