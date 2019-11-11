@@ -157,6 +157,14 @@ public class KaitaiMojo extends AbstractMojo {
 	@Parameter(property = "kaitai.opaqueTypes")
 	private Boolean opaqueTypes;
 
+	/**
+	 * Allow to disable Java version check.
+	 *
+	 * @since 0.1.6
+	 */
+	@Parameter(property = "kaitai.noVersionCheck", defaultValue = "false")
+	private boolean noVersionCheck;
+
 	@Parameter(defaultValue = "${settings}", readonly = true)
 	private Settings settings;
 
@@ -221,6 +229,7 @@ public class KaitaiMojo extends AbstractMojo {
 			.executionTimeout(executionTimeout)
 			.fromFileClass(fromFileClass)
 			.opaqueTypes(opaqueTypes)
+			.noVersionCheck(noVersionCheck)
 			.generate(logger);
 
 		//Add generated directory into Maven's build scope

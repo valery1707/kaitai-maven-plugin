@@ -26,6 +26,7 @@
 				<version>@project.version@</version>
 				<configuration>
 					<fromFileClass>name.valery1707.kaitai.it.CustomStream</fromFileClass>
+					<noVersionCheck>true</noVersionCheck>
 				</configuration>
 				<executions>
 					<execution>

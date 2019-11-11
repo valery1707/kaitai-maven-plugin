@@ -42,6 +42,7 @@ See [kaitai-java-demo](https://github.com/valery1707/kaitai-java-demo).
 | executionTimeout| Long         | 0.1.3 | Timeout for execution operations.<br><br>**Default**: `5000` |
 | fromFileClass   | String       | 0.1.3 | Classname with custom KaitaiStream implementations for static builder `fromFile(...)`|
 | opaqueTypes     | Boolean      | 0.1.3 | Allow use opaque (external) types in ksy. See more in [documentation](http://doc.kaitai.io/user_guide.html#opaque-types).|
+| noVersionCheck  | Boolean      | 0.1.6 | Allow to disable Java version check. For non-Windows only.<br><br>**Default**: `false`       |
 
 ### Useful commands
 

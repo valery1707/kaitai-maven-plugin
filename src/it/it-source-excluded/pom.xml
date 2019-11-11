@@ -25,6 +25,7 @@
 					<excludes>
 						<exclude>ico.ksy</exclude>
 					</excludes>
+					<noVersionCheck>true</noVersionCheck>
 				</configuration>
 				<executions>
 					<execution>

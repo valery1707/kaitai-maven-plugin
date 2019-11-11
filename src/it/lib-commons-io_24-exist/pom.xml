@@ -31,6 +31,9 @@
 						<version>2.4</version>
 					</dependency>
 				</dependencies>
+				<configuration>
+					<noVersionCheck>true</noVersionCheck>
+				</configuration>
 				<executions>
 					<execution>
 						<id>generate</id>

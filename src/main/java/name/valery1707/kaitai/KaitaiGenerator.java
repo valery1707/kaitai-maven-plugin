@@ -2,6 +2,7 @@ package name.valery1707.kaitai;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.io.output.TeeOutputStream;
+import org.apache.commons.lang3.SystemUtils;
 import org.buildobjects.process.ExternalProcessFailureException;
 import org.buildobjects.process.ProcBuilder;
 import org.buildobjects.process.StartupException;
@@ -33,6 +34,7 @@ public class KaitaiGenerator {
 	private long executionTimeout = 5_000;
 	private String fromFileClass;
 	private Boolean opaqueTypes;
+	private boolean noVersionCheck;
 
 	/**
 	 * Build {@code KaitaiGenerator} with preconfigured state.
@@ -215,16 +217,55 @@ public class KaitaiGenerator {
 		return this;
 	}
 
+	/**
+	 * Get version check mode.
+	 *
+	 * @return Version check mode
+	 */
+	public boolean isNoVersionCheck() {
+		return noVersionCheck;
+	}
+
+	/**
+	 * Set version check mode.
+	 *
+	 * @param noVersionCheck Version check mode
+	 */
+	public void setNoVersionCheck(boolean noVersionCheck) {
+		this.noVersionCheck = noVersionCheck;
+	}
+
+	/**
+	 * Set version check mode.
+	 *
+	 * @param noVersionCheck Version check mode
+	 * @return self
+	 */
+	public KaitaiGenerator noVersionCheck(boolean noVersionCheck) {
+		setNoVersionCheck(noVersionCheck);
+		return this;
+	}
+
 	private ProcBuilder process(Logger log) {
 		ProcBuilder builder = new ProcBuilder(getKaitai().normalize().toAbsolutePath().toString())
 			.withErrorStream(new TeeOutputStream(LogWriter.logError(log), streamError))
 			.withOutputStream(new TeeOutputStream(LogWriter.logInfo(log), streamOutput))
 			.withExpectedExitStatuses(0);
+
 		if (getExecutionTimeout() < 0) {
 			builder.withNoTimeout();
 		} else {
 			builder.withTimeoutMillis(getExecutionTimeout());
 		}
+
+		if (isNoVersionCheck()) {
+			if (SystemUtils.IS_OS_WINDOWS) {
+				log.info("Option `noVersionCheck` is ignored on Windows");
+			} else {
+				builder.withArgs("-no-version-check");
+			}
+		}
+
 		return builder;
 	}
 

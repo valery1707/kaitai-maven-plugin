@@ -59,6 +59,7 @@ public class KaitaiGeneratorTest {
 		Files.createDirectory(generated);
 		return KaitaiGenerator
 			.generator(kaitai, generated, "name.valery1707.kaitai.test")
+			.noVersionCheck(true)
 			.withSource(sources);
 	}
 
@@ -114,7 +115,8 @@ public class KaitaiGeneratorTest {
 				: "/executable/_timeout.sh"
 			, temporaryFolder
 		);
-		return KaitaiGenerator.generator(executable, executable.getParent(), getClass().getPackage().getName());
+		return KaitaiGenerator.generator(executable, executable.getParent(), getClass().getPackage().getName())
+							  .noVersionCheck(true);
 	}
 
 	@Test

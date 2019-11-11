@@ -27,6 +27,7 @@
 				<configuration>
 					<output>${project.build.sourceDirectory}</output>
 					<exactOutput>true</exactOutput>
+					<noVersionCheck>true</noVersionCheck>
 				</configuration>
 				<executions>
 					<execution>

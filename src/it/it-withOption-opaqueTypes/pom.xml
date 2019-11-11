@@ -26,6 +26,7 @@
 				<version>@project.version@</version>
 				<configuration>
 					<opaqueTypes>true</opaqueTypes>
+					<noVersionCheck>true</noVersionCheck>
 				</configuration>
 				<executions>
 					<execution>

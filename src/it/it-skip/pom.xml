@@ -23,6 +23,7 @@
 				<version>@project.version@</version>
 				<configuration>
 					<skip>true</skip>
+					<noVersionCheck>true</noVersionCheck>
 				</configuration>
 				<executions>
 					<execution>
