@@ -3,9 +3,9 @@ language: java
 sudo: false # faster builds
 
 jdk:
-  - oraclejdk8
-  - oraclejdk9
   - openjdk8
+#  - openjdk11 # todo Blocked by https://github.com/kaitai-io/kaitai_struct/issues/483
+#  - oraclejdk11 # todo Blocked by https://github.com/kaitai-io/kaitai_struct/issues/483
 
 script:
   - mvn clean verify -P run-its
