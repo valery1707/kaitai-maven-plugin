@@ -54,6 +54,11 @@
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 	</properties>
 
+	<prerequisites>
+		<!-- https://issues.apache.org/jira/browse/MNG-4565 -->
+		<maven>3.2.2</maven>
+	</prerequisites>
+
 	<dependencies>
 		<!--Provided-->
 		<dependency>
@@ -90,7 +95,7 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.5</version>
+			<version>3.9</version>
 		</dependency>
 		<dependency>
 			<groupId>org.buildobjects</groupId>

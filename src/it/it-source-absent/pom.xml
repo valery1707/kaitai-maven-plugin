@@ -21,9 +21,6 @@
 				<groupId>@project.groupId@</groupId>
 				<artifactId>@project.artifactId@</artifactId>
 				<version>@project.version@</version>
-				<configuration>
-					<noVersionCheck>true</noVersionCheck>
-				</configuration>
 				<executions>
 					<execution>
 						<id>generate</id>
@@ -35,4 +32,23 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<prerequisites>
+		<maven>3.2.2</maven>
+	</prerequisites>
+	<profiles>
+		<profile>
+			<id>no-javaVersionCheck-onUnix</id>
+			<activation>
+				<jdk>[11,)</jdk>
+				<os>
+					<family>unix</family>
+				</os>
+			</activation>
+			<properties>
+				<kaitai.noVersionCheck>true</kaitai.noVersionCheck>
+			</properties>
+		</profile>
+	</profiles>
+
 </project>

@@ -1,6 +1,7 @@
 package name.valery1707.kaitai;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.JavaVersion;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.buildobjects.process.ExternalProcessFailureException;
@@ -59,7 +60,7 @@ public class KaitaiGeneratorTest {
 		Files.createDirectory(generated);
 		return KaitaiGenerator
 			.generator(kaitai, generated, "name.valery1707.kaitai.test")
-			.noVersionCheck(true)
+			.noVersionCheck(SystemUtils.IS_OS_UNIX && SystemUtils.isJavaVersionAtLeast(JavaVersion.JAVA_9))
 			.withSource(sources);
 	}
 
@@ -115,8 +116,9 @@ public class KaitaiGeneratorTest {
 				: "/executable/_timeout.sh"
 			, temporaryFolder
 		);
-		return KaitaiGenerator.generator(executable, executable.getParent(), getClass().getPackage().getName())
-							  .noVersionCheck(true);
+		return KaitaiGenerator
+			.generator(executable, executable.getParent(), getClass().getPackage().getName())
+			.noVersionCheck(SystemUtils.IS_OS_UNIX && SystemUtils.isJavaVersionAtLeast(JavaVersion.JAVA_9));
 	}
 
 	@Test
