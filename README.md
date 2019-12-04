@@ -5,6 +5,12 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/bbvjf5q9faru09xp/branch/master?svg=true)](https://ci.appveyor.com/project/valery1707/kaitai-maven-plugin/branch/master)
 [![CircleCI](https://circleci.com/gh/valery1707/kaitai-maven-plugin/tree/master.svg?style=svg)](https://circleci.com/gh/valery1707/kaitai-maven-plugin/tree/master)
 
+[![Scc Count Badge](https://sloc.xyz/github/valery1707/kaitai-maven-plugin/?category=code)](https://github.com/valery1707/kaitai-maven-plugin/)
+[![Scc Count Badge](https://sloc.xyz/github/valery1707/kaitai-maven-plugin/?category=blanks)](https://github.com/valery1707/kaitai-maven-plugin/)
+[![Scc Count Badge](https://sloc.xyz/github/valery1707/kaitai-maven-plugin/?category=lines)](https://github.com/valery1707/kaitai-maven-plugin/)
+[![Scc Count Badge](https://sloc.xyz/github/valery1707/kaitai-maven-plugin/?category=comments)](https://github.com/valery1707/kaitai-maven-plugin/)
+[![Scc Count Badge](https://sloc.xyz/github/valery1707/kaitai-maven-plugin/?category=cocomo)](https://github.com/valery1707/kaitai-maven-plugin/)
+
 [![DevOps By Rultor.com](http://www.rultor.com/b/valery1707/kaitai-maven-plugin)](http://www.rultor.com/p/valery1707/kaitai-maven-plugin)
 
 Maven plugin for [Kaitai](http://kaitai.io/): declarative language to generate binary data parsers.
