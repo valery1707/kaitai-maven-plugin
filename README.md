@@ -5,6 +5,9 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/bbvjf5q9faru09xp/branch/master?svg=true)](https://ci.appveyor.com/project/valery1707/kaitai-maven-plugin/branch/master)
 [![CircleCI](https://circleci.com/gh/valery1707/kaitai-maven-plugin/tree/master.svg?style=svg)](https://circleci.com/gh/valery1707/kaitai-maven-plugin/tree/master)
 
+[![LGTM total alerts](https://img.shields.io/lgtm/alerts/g/valery1707/kaitai-maven-plugin.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/valery1707/kaitai-maven-plugin/alerts/)
+[![LGTM language grade: Java](https://img.shields.io/lgtm/grade/java/g/valery1707/kaitai-maven-plugin.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/valery1707/kaitai-maven-plugin/context:java)
+
 [![Scc Count Badge](https://sloc.xyz/github/valery1707/kaitai-maven-plugin/?category=code)](https://github.com/valery1707/kaitai-maven-plugin/)
 [![Scc Count Badge](https://sloc.xyz/github/valery1707/kaitai-maven-plugin/?category=blanks)](https://github.com/valery1707/kaitai-maven-plugin/)
 [![Scc Count Badge](https://sloc.xyz/github/valery1707/kaitai-maven-plugin/?category=lines)](https://github.com/valery1707/kaitai-maven-plugin/)
