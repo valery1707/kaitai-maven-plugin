@@ -55,5 +55,5 @@ See [kaitai-java-demo](https://github.com/valery1707/kaitai-java-demo).
 
 ### Useful commands
 
-* Execute integration test: `mvn clean verify -P run-its`
-* Execute checkstyle (report will be stored in `target/site/checkstyle.html`): `mvn checkstyle:checkstyle`
+* Execute integration test: `./mvnw clean verify -P run-its`
+* Execute checkstyle (report will be stored in `target/site/checkstyle.html`): `./mvnw checkstyle:checkstyle`

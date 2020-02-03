@@ -8,7 +8,7 @@ jdk:
   - oraclejdk11
 
 script:
-  - mvn clean verify -P run-its
+  - ./mvnw clean verify -P run-its -B -V
 
 after_success:
   - python <(curl -s https://raw.githubusercontent.com/TouK/sputnik-ci/master/sputnik-ci.py)
