@@ -21,14 +21,14 @@ jobs:
       - restore_cache: # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
           key: kaitai-maven-plugin-{{ checksum "pom.xml" }}
 
-      - run: mvn --batch-mode dependency:go-offline
+      - run: ./mvnw dependency:go-offline -B -V
 
       - save_cache: # saves the project dependencies
           paths:
             - ~/.m2
           key: kaitai-maven-plugin-{{ checksum "pom.xml" }}
 
-      - run: mvn --batch-mode verify -P run-its
+      - run: ./mvnw clean verify -P run-its -B -V
 
       - store_test_results: # Upload test results for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
           path: target/surefire-reports

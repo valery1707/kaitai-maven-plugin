@@ -53,10 +53,10 @@ cat ~/.ssh/config
 
 # Update version
 sed --in-place "s/# SNAPSHOT/# SNAPSHOT\n\n# ${version}/g" CHANGELOG.md
-mvn --batch-mode versions:set "-DnewVersion=${version}"
+./mvnw --batch-mode versions:set "-DnewVersion=${version}"
 
 # Build and sign
-mvn --batch-mode clean install -P release -Dgpg.passphrase=${gpg_pass}
+./mvnw --batch-mode clean install -P release -Dgpg.passphrase=${gpg_pass}
 
 # Commit and tag
 git commit -am "Release version ${version}"
@@ -71,10 +71,10 @@ unset old_name
 unset old_email
 
 # Deploy artifact to Maven Central
-mvn --batch-mode deploy -P release -Dmaven.test.skip=true -Dgpg.passphrase=${gpg_pass} --settings ../settings.xml
+./mvnw --batch-mode deploy -P release -Dmaven.test.skip=true -Dgpg.passphrase=${gpg_pass} --settings ../settings.xml
 
 # Next development iteration
-mvn --batch-mode versions:set "-DnewVersion=${next}-SNAPSHOT"
+./mvnw --batch-mode versions:set "-DnewVersion=${next}-SNAPSHOT"
 git commit -am "Prepare for next development iteration"
 
 # Push
@@ -83,4 +83,4 @@ git tag --verify v${version}
 git push --verbose --tags origin
 
 # Update Github release
-mvn --batch-mode de.jutzig:github-release-plugin:release -P release --settings ../settings.xml --projects . -Dgithub.tag="v${version}" -Dgithub.releaseName="v${version}" -Dgithub.description="${changelog}"
+./mvnw --batch-mode de.jutzig:github-release-plugin:release -P release --settings ../settings.xml --projects . -Dgithub.tag="v${version}" -Dgithub.releaseName="v${version}" -Dgithub.description="${changelog}"
