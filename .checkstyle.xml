@@ -33,10 +33,6 @@
 			<property name="allowByTailComment" value="true"/>
 			<property name="allowNonPrintableEscapes" value="true"/>
 		</module>
-		<module name="LineLength">
-			<property name="max" value="165"/>
-			<property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
-		</module>
 		<module name="AvoidStarImport">
 			<property name="allowClassImports" value="true"/>
 			<property name="allowStaticMemberImports" value="true"/>
@@ -232,12 +228,10 @@
 		</module>
 		<module name="JavadocMethod">
 			<property name="scope" value="public"/>
+			<property name="validateThrows" value="false"/>
 			<property name="allowMissingParamTags" value="true"/>
-			<property name="allowMissingThrowsTags" value="true"/>
 			<property name="allowMissingReturnTag" value="true"/>
-			<property name="minLineCount" value="2"/>
 			<property name="allowedAnnotations" value="Override, Test"/>
-			<property name="allowThrowsTagsForSubclasses" value="true"/>
 		</module>
 		<module name="MethodName">
 			<property name="format" value="^[a-z][a-z0-9][a-zA-Z0-9_]*$"/>
@@ -251,5 +245,10 @@
 			<property name="exceptionVariableName" value="expected"/>
 		</module>
 		<module name="CommentsIndentation"/>
+	</module>
+
+	<module name="LineLength">
+		<property name="max" value="165"/>
+		<property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
 	</module>
 </module>
