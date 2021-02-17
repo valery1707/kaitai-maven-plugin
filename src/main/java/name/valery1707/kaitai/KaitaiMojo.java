@@ -158,6 +158,12 @@ public class KaitaiMojo extends AbstractMojo {
 	private Boolean opaqueTypes;
 
 	/**
+	 * Disable auto-running `_read` in constructor.
+	 */
+	@Parameter(property = "kaitai.noAutoRead", defaultValue = "false")
+	private Boolean noAutoRead;
+
+	/**
 	 * Allow to disable Java version check.
 	 *
 	 * @since 0.1.6
@@ -230,6 +236,7 @@ public class KaitaiMojo extends AbstractMojo {
 			.fromFileClass(fromFileClass)
 			.opaqueTypes(opaqueTypes)
 			.noVersionCheck(noVersionCheck)
+			.noAutoRead(noAutoRead)
 			.generate(logger);
 
 		//Add generated directory into Maven's build scope
