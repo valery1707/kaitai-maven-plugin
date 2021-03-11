@@ -18,7 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static name.valery1707.kaitai.KaitaiMojo.KAITAI_VERSION;
+import static name.valery1707.kaitai.KaitaiMojo.*;
 import static name.valery1707.kaitai.KaitaiUtils.downloadKaitai;
 import static name.valery1707.kaitai.KaitaiUtils.prepareUrl;
 import static name.valery1707.kaitai.KaitaiUtilsTest.copy;
@@ -53,9 +53,9 @@ public class KaitaiGeneratorTest {
 			.resolve("src/it");
 	}
 
-	private KaitaiGenerator generator(Path... sources) throws IOException, KaitaiException {
+	private KaitaiGenerator generator(String version, Path... sources) throws IOException, KaitaiException {
 		Path cache = temporaryFolder.newFolder().toPath();
-		Path kaitai = downloadKaitai(prepareUrl(null, KAITAI_VERSION), cache, LOG);
+		Path kaitai = downloadKaitai(prepareUrl(null, version), cache, LOG);
 		Path generated = cache.resolve("generated");
 		Files.createDirectory(generated);
 		return KaitaiGenerator
@@ -65,12 +65,28 @@ public class KaitaiGeneratorTest {
 	}
 
 	@Test
-	public void testGenerate_success() throws IOException, URISyntaxException, KaitaiException {
+	public void testGenerate_success_ver_0_8() throws IOException, URISyntaxException, KaitaiException {
 		Path source = findIt()
 			.resolve("it-source-exist/src/main/resources/kaitai/ico.ksy");
-		KaitaiGenerator generator = generator(source);
+		KaitaiGenerator generator = generator(KAITAI_VERSION_08, source);
 		Path target = generator.generate(LOG);
 		assertThat(target).isDirectory().hasFileName("src");
+		Path pkg = target.resolve(generator.getPackageName().replace('.', '/'));
+		assertThat(pkg).isDirectory();
+		for (Path src : generator.getSources()) {
+			String kaitaiName = src.getFileName().toString();
+			String javaName = capitalize(removeExtension(kaitaiName)) + ".java";
+			assertThat(pkg.resolve(javaName)).isRegularFile();
+		}
+	}
+
+	@Test
+	public void testGenerate_success_ver_0_9() throws IOException, URISyntaxException, KaitaiException {
+		Path source = findIt()
+			.resolve("it-source-exist/src/main/resources/kaitai/ico.ksy");
+		KaitaiGenerator generator = generator(KAITAI_VERSION_09, source);
+		Path target = generator.generate(LOG);
+		assertThat(target).isDirectory();
 		Path pkg = target.resolve(generator.getPackageName().replace('.', '/'));
 		assertThat(pkg).isDirectory();
 		for (Path src : generator.getSources()) {
@@ -84,7 +100,7 @@ public class KaitaiGeneratorTest {
 	public void testGenerate_failed() throws IOException, URISyntaxException, KaitaiException {
 		Path source = findIt()
 			.resolve("it-source-failed/src/main/resources/kaitai/demo.ksy");
-		KaitaiGenerator generator = generator(source);
+		KaitaiGenerator generator = generator(KAITAI_VERSION_LATEST, source);
 		try {
 			generator.generate(LOG);
 			fail("Must generate exception because of problems in specification");
@@ -92,7 +108,7 @@ public class KaitaiGeneratorTest {
 			assertThat(e)
 				.hasMessageContaining("/types/header/seq/0/id: invalid attribute ID: 'Magic', expected /^[a-z][a-z0-9_]*$/")
 			;
-			assertThat(e.getMessage()).doesNotContain(KAITAI_VERSION);
+			assertThat(e.getMessage()).doesNotContain(KAITAI_VERSION_LATEST);
 
 			assertThat(e.getCause())
 				.isInstanceOf(ExternalProcessFailureException.class)
@@ -151,12 +167,12 @@ public class KaitaiGeneratorTest {
 	}
 
 	@Test
-	public void testOption_fromFileClass() throws URISyntaxException, IOException, KaitaiException {
+	public void testOption_fromFileClass_ver_0_8() throws URISyntaxException, IOException, KaitaiException {
 		Path source = findIt()
 			.resolve("it-source-exist/src/main/resources/kaitai/ico.ksy");
 		String fromFileClassName = "TestStream";
 		String fromFileClass = "name.valery1707.kaitai.test" + "." + fromFileClassName;
-		KaitaiGenerator generator = generator(source)
+		KaitaiGenerator generator = generator(KAITAI_VERSION_08, source)
 			.fromFileClass(fromFileClass);
 		Path target = generator.generate(LOG);
 		assertThat(target).isDirectory().hasFileName("src");
@@ -175,10 +191,10 @@ public class KaitaiGeneratorTest {
 	}
 
 	@Test
-	public void testOption_opaqueTypes_enabled() throws URISyntaxException, IOException, KaitaiException {
+	public void testOption_opaqueTypes_enabled_ver_0_8() throws URISyntaxException, IOException, KaitaiException {
 		Path source = findIt()
 			.resolve("it-withOption-opaqueTypes/src/main/resources/kaitai/doc_container.ksy");
-		KaitaiGenerator generator = generator(source)
+		KaitaiGenerator generator = generator(KAITAI_VERSION_08, source)
 			.opaqueTypes(true);
 		Path target = generator.generate(LOG);
 		assertThat(target).isDirectory().hasFileName("src");
@@ -199,7 +215,7 @@ public class KaitaiGeneratorTest {
 	public void testOption_opaqueTypes_disabled() throws URISyntaxException, IOException, KaitaiException {
 		Path source = findIt()
 			.resolve("it-withOption-opaqueTypes/src/main/resources/kaitai/doc_container.ksy");
-		KaitaiGenerator generator = generator(source)
+		KaitaiGenerator generator = generator(KAITAI_VERSION_LATEST, source)
 			.opaqueTypes(false);
 		try {
 			generator.generate(LOG);
@@ -208,7 +224,7 @@ public class KaitaiGeneratorTest {
 			assertThat(e)
 				.hasMessageContaining("/seq/0: unable to find type 'custom_encrypted_object', searching from doc_container")
 			;
-			assertThat(e.getMessage()).doesNotContain(KAITAI_VERSION);
+			assertThat(e.getMessage()).doesNotContain(KAITAI_VERSION_LATEST);
 
 			assertThat(e.getCause())
 				.isInstanceOf(ExternalProcessFailureException.class)
