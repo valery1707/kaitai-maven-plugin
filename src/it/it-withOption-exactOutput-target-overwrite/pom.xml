@@ -26,6 +26,7 @@
 				<version>@project.version@</version>
 				<configuration>
 					<output>${project.build.sourceDirectory}</output>
+					<version>0.8</version>
 					<exactOutput>true</exactOutput>
 				</configuration>
 				<executions>

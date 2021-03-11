@@ -24,6 +24,9 @@
 				<groupId>@project.groupId@</groupId>
 				<artifactId>@project.artifactId@</artifactId>
 				<version>@project.version@</version>
+				<configuration>
+					<version>0.8</version>
+				</configuration>
 				<dependencies>
 					<dependency>
 						<groupId>commons-io</groupId>

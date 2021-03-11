@@ -4,10 +4,10 @@ import com.github.marschall.memoryfilesystem.MemoryFileSystemBuilder;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
+import org.assertj.core.api.ThrowableAssert;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
 
@@ -30,9 +30,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static name.valery1707.kaitai.KaitaiMojo.KAITAI_VERSION;
 import static name.valery1707.kaitai.KaitaiUtils.*;
 import static org.apache.commons.io.FilenameUtils.getName;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.containsString;
+import static org.assertj.core.api.Assertions.*;
 import static org.slf4j.helpers.NOPLogger.NOP_LOGGER;
 
 public class KaitaiUtilsTest {
@@ -40,9 +38,6 @@ public class KaitaiUtilsTest {
 
 	@Rule
 	public TemporaryFolder temporaryFolder = new TemporaryFolder();
-
-	@Rule
-	public ExpectedException exception = ExpectedException.none();
 
 	static Path copy(String resource, Path file) throws IOException {
 		Files.createDirectories(file.getParent());
@@ -448,13 +443,17 @@ public class KaitaiUtilsTest {
 			.hasBinaryContent(new byte[0]);
 	}
 
-	@Test(expected = KaitaiException.class)
-	public void testDownload_404() throws IOException, KaitaiException {
-		Path target = temporaryFolder.newFile("assertj-core-2.9.0.jar").toPath();
+	@Test
+	public void testDownload_404() throws IOException {
+		final Path target = temporaryFolder.newFile("assertj-core-2.9.0.jar").toPath();
 		Files.delete(target);
-		URL source = new URL("https://search.maven.org/remotecontent?filepath=org/assertj/assertj-core/2.7.0/assertj-core-2.9.0.jar");
-		download(source, target, LOG);
-		throw new IllegalStateException("Unreachable statement");
+		final URL source = new URL("https://search.maven.org/remotecontent?filepath=org/assertj/assertj-core/2.7.0/assertj-core-2.9.0.jar");
+		assertThatThrownBy(new ThrowableAssert.ThrowingCallable() {
+			@Override
+			public void call() throws Throwable {
+				download(source, target, LOG);
+			}
+		}).isInstanceOf(KaitaiException.class);
 	}
 
 	@Test
@@ -473,9 +472,13 @@ public class KaitaiUtilsTest {
 
 	@Test
 	@Ignore
-	public void testPrepareUrl_failedIfBadVersion() throws KaitaiException {
-		exception.expect(KaitaiException.class);
-		prepareUrl(null, "?#~@");
+	public void testPrepareUrl_failedIfBadVersion() {
+		assertThatThrownBy(new ThrowableAssert.ThrowingCallable() {
+			@Override
+			public void call() throws Throwable {
+				prepareUrl(null, "?#~@");
+			}
+		}).isInstanceOf(KaitaiException.class);
 	}
 
 	@Test
@@ -489,10 +492,15 @@ public class KaitaiUtilsTest {
 	}
 
 	@Test
-	public void testDownloadKaitai_invalidZipContent() throws IOException, KaitaiException {
-		exception.expect(KaitaiException.class);
-		exception.expectMessage(containsString("Fail to find start script"));
-		Path cache = temporaryFolder.newFolder().toPath();
-		downloadKaitai(getClass().getResource("/demo-vertx.zip"), cache, LOG);
+	public void testDownloadKaitai_invalidZipContent() throws IOException {
+		final Path cache = temporaryFolder.newFolder().toPath();
+		assertThatThrownBy(new ThrowableAssert.ThrowingCallable() {
+			@Override
+			public void call() throws Throwable {
+				downloadKaitai(getClass().getResource("/demo-vertx.zip"), cache, LOG);
+			}
+		})
+			.isInstanceOf(KaitaiException.class)
+			.hasMessageContaining("Fail to find start script");
 	}
 }

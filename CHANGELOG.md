@@ -2,6 +2,9 @@ Change log for releases.
 
 # SNAPSHOT
 
+* Allow to disable auto-running `_read` in constructor
+* Update default version of Kaitai compiler to `0.9`
+
 # 0.1.6
 
 # 0.1.5

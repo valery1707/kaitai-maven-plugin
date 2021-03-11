@@ -31,7 +31,10 @@ import static name.valery1707.kaitai.KaitaiUtils.*;
 	, defaultPhase = LifecyclePhase.GENERATE_SOURCES
 )
 public class KaitaiMojo extends AbstractMojo {
-	static final String KAITAI_VERSION = "0.8";
+	static final String KAITAI_VERSION_08 = "0.8";
+	static final String KAITAI_VERSION_09 = "0.9";
+	static final String KAITAI_VERSION_LATEST = KAITAI_VERSION_09;
+	static final String KAITAI_VERSION = KAITAI_VERSION_LATEST;
 
 	/**
 	 * Version of <a href="http://kaitai.io/#download">KaiTai</a> library.
@@ -161,7 +164,7 @@ public class KaitaiMojo extends AbstractMojo {
 	 * Disable auto-running `_read` in constructor.
 	 */
 	@Parameter(property = "kaitai.noAutoRead", defaultValue = "false")
-	private Boolean noAutoRead;
+	private boolean noAutoRead;
 
 	/**
 	 * Allow to disable Java version check.

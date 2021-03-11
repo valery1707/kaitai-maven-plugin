@@ -25,6 +25,7 @@
 				<artifactId>@project.artifactId@</artifactId>
 				<version>@project.version@</version>
 				<configuration>
+					<version>0.8</version>
 					<fromFileClass>name.valery1707.kaitai.it.CustomStream</fromFileClass>
 				</configuration>
 				<executions>
