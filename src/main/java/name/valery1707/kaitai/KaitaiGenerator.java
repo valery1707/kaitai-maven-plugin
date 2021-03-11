@@ -35,6 +35,7 @@ public class KaitaiGenerator {
 	private String fromFileClass;
 	private Boolean opaqueTypes;
 	private boolean noVersionCheck;
+	private boolean noAutoRead;
 
 	/**
 	 * Build {@code KaitaiGenerator} with preconfigured state.
@@ -245,6 +246,34 @@ public class KaitaiGenerator {
 		setNoVersionCheck(noVersionCheck);
 		return this;
 	}
+	/**
+	 * Get no auto read mode.
+	 *
+	 * @return Version no auto read mode
+	 */
+	public boolean isNoAutoRead() {
+		return noAutoRead;
+	}
+	/**
+	 * Set no auto read mode.
+	 *
+	 * @param noAutoRead no auto read mode
+	 */
+	public void setNoAutoRead(boolean noAutoRead) {
+		this.noAutoRead = noAutoRead;
+	}
+
+	/**
+	 * Set no auto read mode.
+	 *
+	 * @param noAutoRead no auto read mode
+	 * @return self
+	 */
+	public KaitaiGenerator noAutoRead(boolean noAutoRead) {
+		setNoAutoRead(noAutoRead);
+		return this;
+	}
+
 
 	private ProcBuilder process(Logger log) {
 		ProcBuilder builder = new ProcBuilder(getKaitai().normalize().toAbsolutePath().toString())
@@ -311,6 +340,9 @@ public class KaitaiGenerator {
 			.withArgs("--target", "java")
 			.withArgs("--outdir", output.toFile().getAbsolutePath())
 			.withArgs("--java-package", getPackageName());
+		if (isNoAutoRead()) {
+			builder.withArgs("--no-auto-read");
+		}
 		if (isNotBlank(getFromFileClass())) {
 			builder.withArgs("--java-from-file-class", getFromFileClass());
 		}
