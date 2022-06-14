@@ -53,6 +53,8 @@ See [kaitai-java-demo](https://github.com/valery1707/kaitai-java-demo).
 | opaqueTypes     | Boolean      | 0.1.3 | Allow use opaque (external) types in ksy. See more in [documentation](http://doc.kaitai.io/user_guide.html#opaque-types).|
 | noVersionCheck  | Boolean      | 0.1.6 | Allow to disable Java version check. For non-Windows only.<br><br>**Default**: `false`       |
 | noAutoRead      | Boolean      | 0.1.7 | Allow to disable auto-running `_read` in constructor <br><br>**Default**: `false`       |
+| readPos         | boolean      | 0.1.7 | Adds fields `_seqFields`, `_attrStart`, `_attrEnd`, `_arrStart`, and `_arrEnd` to the compiled Java file. Needed for visuzalization tools. <br><br>**Default**: `false` |
+| debug           | boolean      | 0.1.7 | Same as setting both `noAutoRead` and `readPos` to true. <br><br>**Default**: `false`                                                                                   |
 
 ### Useful commands
 

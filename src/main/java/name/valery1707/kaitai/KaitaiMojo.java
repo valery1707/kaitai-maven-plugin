@@ -171,6 +171,22 @@ public class KaitaiMojo extends AbstractMojo {
 	@Parameter(property = "kaitai.noVersionCheck", defaultValue = "false")
 	private boolean noVersionCheck;
 
+	/**
+	 * Adds fields {@code _seqFields}, {@code _attrStart}, {@code _attrEnd}, {@code _arrStart}, and {@code _arrEnd} to the compiled Java file.
+	 *
+	 * @see <a href="https://github.com/kaitai-io/kaitai_struct_compiler/blob/0a04070dd53542c80e22ca07d0c116b9d371d740/jvm/src/main/scala/io/kaitai/struct/JavaMain.scala#L159">kaitai-struct-compiler source</a>
+	 */
+	@Parameter(property = "kaitai.readPos", defaultValue = "false")
+	private boolean readPos;
+
+	/**
+	 * Same as setting both {@code noAutoRead} and {@code readPos} to true.
+	 *
+	 * @see <a href="https://github.com/kaitai-io/kaitai_struct_compiler/blob/0a04070dd53542c80e22ca07d0c116b9d371d740/jvm/src/main/scala/io/kaitai/struct/JavaMain.scala#L163">kaitai-struct-compiler source</a>
+	 */
+	@Parameter(property = "kaitai.debug", defaultValue = "false")
+	private boolean debug;
+
 	@Parameter(defaultValue = "${settings}", readonly = true)
 	private Settings settings;
 
@@ -237,6 +253,8 @@ public class KaitaiMojo extends AbstractMojo {
 			.opaqueTypes(opaqueTypes)
 			.noVersionCheck(noVersionCheck)
 			.noAutoRead(noAutoRead)
+			.readPos(readPos)
+			.debug(debug)
 			.generate(logger);
 
 		//Add generated directory into Maven's build scope
