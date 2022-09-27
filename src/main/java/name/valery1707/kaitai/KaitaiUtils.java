@@ -359,7 +359,7 @@ public final class KaitaiUtils {
 		return dir;
 	}
 
-	private static final String URL_FORMAT = "https://dl.bintray.com/kaitai-io/universal/%s/kaitai-struct-compiler-%s.zip";
+	private static final String URL_FORMAT = "https://github.com/kaitai-io/kaitai_struct_compiler/releases/download/%s/kaitai-struct-compiler-%s.zip";
 
 	/**
 	 * Use external {@code url} if it non null or create new url from template.
