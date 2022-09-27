@@ -356,8 +356,8 @@ public class KaitaiGenerator {
 
 		log.info("Kaitai: generate");
 		execute(builder);
-		output = output.resolve("src");
 		if (isExactOutput()) {
+			output = output.resolve("src"); // if you set this option, you are probably using 0.8 or earlier
 			Path root = getOutput();
 			List<Path> generated = scanFiles(output, new String[]{"*"}, new String[0]);
 			move(output, generated, root);
