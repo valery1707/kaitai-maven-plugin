@@ -2,6 +2,8 @@ Change log for releases.
 
 # SNAPSHOT
 
+* Migrate Kaitai distribution URL from JFrog Bintray to GitHub releases
+
 # 0.1.6
 
 # 0.1.5
