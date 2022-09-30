@@ -1,0 +1,24 @@
+name: Build project
+
+on: pull_request
+
+jobs:
+  build-project:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        jvmVersion: [ '8', '11', '17' ]
+        jvmDistribution: [ 'adopt', 'liberica' ]
+    name: Build with ${{ matrix.jvmVersion }} (${{ matrix.jvmDistribution }}) on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout project sources
+        uses: actions/checkout@v3
+      - name: Set up JDK ${{ matrix.jvmVersion }} (${{ matrix.jvmDistribution }})
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ matrix.jvmVersion }}
+          distribution: ${{ matrix.jvmDistribution }}
+          cache: maven
+      - name: Build with Maven
+        run: ./mvnw --batch-mode --update-snapshots verify
