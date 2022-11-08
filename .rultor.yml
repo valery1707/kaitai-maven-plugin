@@ -1,5 +1,5 @@
 docker:
-  image: yegor256/java8
+  image: yegor256/rultor-image:1.12.3
 decrypt:
   settings.xml: "repo/.rultor/settings.xml.asc"
   pubring.gpg: "repo/.rultor/pubring.gpg.asc"
