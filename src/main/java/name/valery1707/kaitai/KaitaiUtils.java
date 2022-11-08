@@ -232,13 +232,19 @@ public final class KaitaiUtils {
 		try {
 			Files.move(source, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
-			throw new KaitaiException(format(
-				"Fail to move '%s' into '%s'"
-				, source.normalize().toAbsolutePath()
-				, target.normalize().toAbsolutePath()
-			)
-				, e
-			);
+			try {
+				Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+				delete(source);
+			} catch (IOException | KaitaiException ex) {
+				e.addSuppressed(ex);
+				throw new KaitaiException(format(
+						"Fail to move '%s' into '%s'"
+						, source.normalize().toAbsolutePath()
+						, target.normalize().toAbsolutePath()
+				)
+						, e
+				);
+			}
 		}
 	}
 

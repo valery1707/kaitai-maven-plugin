@@ -338,6 +338,23 @@ public class KaitaiUtilsTest {
 		testMoveSingle_exists2exists(fs);
 	}
 
+	@Test
+	public void testMoveSingle_differentFs_exists2exists() throws IOException, KaitaiException {
+		FileSystem fsSrc = temporaryFolder.getRoot().toPath().getFileSystem();
+		FileSystem fsDst = MemoryFileSystemBuilder.newWindows().build();
+
+		byte[] contentS = IOUtils.toByteArray(getClass().getResourceAsStream("/executable/_timeout.bat"));
+		byte[] contentT = IOUtils.toByteArray(getClass().getResourceAsStream("/executable/_timeout.sh"));
+		Path source = Files.write(fsSrc.getPath(".", "source.file"), contentS);
+		Path target = Files.write(fsDst.getPath(".", "target.file"), contentT);
+		assertThat(source).exists().hasBinaryContent(contentS);
+		assertThat(target).exists().hasBinaryContent(contentT);
+
+		move(source, target);
+		assertThat(source).doesNotExist();
+		assertThat(target).exists().hasBinaryContent(contentS);
+	}
+
 	private void testMoveCollection_exists2absent(FileSystem fs) throws IOException, KaitaiException {
 		Path source = createPathTree(Files.createDirectory(fs.getPath(".", "source")), directorySimple);
 		Path target = fs.getPath(".", "target");
