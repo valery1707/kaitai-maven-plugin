@@ -70,7 +70,7 @@ public class KaitaiGeneratorTest {
 			.resolve("it-source-exist/src/main/resources/kaitai/ico.ksy");
 		KaitaiGenerator generator = generator(source);
 		Path target = generator.generate(LOG);
-		assertThat(target).isDirectory().hasFileName("src");
+		assertThat(target).isDirectory();
 		Path pkg = target.resolve(generator.getPackageName().replace('.', '/'));
 		assertThat(pkg).isDirectory();
 		for (Path src : generator.getSources()) {
@@ -90,7 +90,7 @@ public class KaitaiGeneratorTest {
 			fail("Must generate exception because of problems in specification");
 		} catch (KaitaiException e) {
 			assertThat(e)
-				.hasMessageContaining("/types/header/seq/0/id: invalid attribute ID: 'Magic', expected /^[a-z][a-z0-9_]*$/")
+				.hasMessageContaining("/types/header/seq/0/id:\n\terror: invalid attribute ID: 'Magic', expected /^[a-z][a-z0-9_]*$/")
 			;
 			assertThat(e.getMessage()).doesNotContain(KAITAI_VERSION);
 
@@ -159,7 +159,7 @@ public class KaitaiGeneratorTest {
 		KaitaiGenerator generator = generator(source)
 			.fromFileClass(fromFileClass);
 		Path target = generator.generate(LOG);
-		assertThat(target).isDirectory().hasFileName("src");
+		assertThat(target).isDirectory();
 		Path pkg = target.resolve(generator.getPackageName().replace('.', '/'));
 		assertThat(pkg).isDirectory();
 		for (Path src : generator.getSources()) {
@@ -181,7 +181,7 @@ public class KaitaiGeneratorTest {
 		KaitaiGenerator generator = generator(source)
 			.opaqueTypes(true);
 		Path target = generator.generate(LOG);
-		assertThat(target).isDirectory().hasFileName("src");
+		assertThat(target).isDirectory();
 		Path pkg = target.resolve(generator.getPackageName().replace('.', '/'));
 		assertThat(pkg).isDirectory();
 		for (Path src : generator.getSources()) {
@@ -206,7 +206,7 @@ public class KaitaiGeneratorTest {
 			fail("Must generate exception because of problems in specification");
 		} catch (KaitaiException e) {
 			assertThat(e)
-				.hasMessageContaining("/seq/0: unable to find type 'custom_encrypted_object', searching from doc_container")
+				.hasMessageContaining("/seq/0:\n\terror: unable to find type 'custom_encrypted_object', searching from doc_container")
 			;
 			assertThat(e.getMessage()).doesNotContain(KAITAI_VERSION);
 

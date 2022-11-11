@@ -37,23 +37,23 @@ See [kaitai-java-demo](https://github.com/valery1707/kaitai-java-demo).
 
 ## Plugin parameters
 
-| Name            | Type         | Since | Description                                                                                                             |
-|-----------------|--------------|-------|-------------------------------------------------------------------------------------------------------------------------|
-| skip            | boolean      | 0.1.0 | Skip plugin execution (don't read/validate any files, don't generate any java types).<br><br>**Default**: `false`       |
-| url             | java.net.URL | 0.1.0 | Direct link onto [KaiTai universal zip archive](http://kaitai.io/#download).<br><br>**Default**: Detected from version  |
-| version         | String       | 0.1.0 | Version of [KaiTai](http://kaitai.io/#download) library.<br><br>**Default**: `0.8`                                      |
-| cacheDir        | java.io.File | 0.1.0 | Cache directory for download KaiTai library.<br><br>**Default**: `build/tmp/kaitai-cache`                               |
-| sourceDirectory | java.io.File | 0.1.0 | Source directory with [Kaitai Struct language](http://formats.kaitai.io/) files.<br><br>**Default**: src/main/resources/kaitai |
-| includes        | String[]     | 0.1.0 | Include wildcard pattern list.<br><br>**Default**: ["*.ksy"]                                                            |
-| excludes        | String[]     | 0.1.0 | Exclude wildcard pattern list.<br><br>**Default**: []                                                                   |
-| output          | java.io.File | 0.1.0 | Target directory for generated Java source files.<br><br>**Default**: `build/generated/kaitai`                          |
-| exactOutput     | Boolean      | 0.1.5 | Move root of packages directory structure exact inside configured output path and remove `src` item.<br><br>**Default**: `false`|
-| packageName     | String       | 0.1.0 | Target package for generated Java source files.<br><br>**Default**: Trying to get project's group or `kaitai` otherwise |
-| executionTimeout| Long         | 0.1.3 | Timeout for execution operations.<br><br>**Default**: `5000` |
-| fromFileClass   | String       | 0.1.3 | Classname with custom KaitaiStream implementations for static builder `fromFile(...)`|
-| opaqueTypes     | Boolean      | 0.1.3 | Allow use opaque (external) types in ksy. See more in [documentation](http://doc.kaitai.io/user_guide.html#opaque-types).|
-| noVersionCheck  | Boolean      | 0.1.6 | Allow to disable Java version check. For non-Windows only.<br><br>**Default**: `false`       |
-| noAutoRead      | Boolean      | 0.1.7 | Allow to disable auto-running `_read` in constructor <br><br>**Default**: `false`       |
+| Name            | Type         | Since | Description                                                                                                                                                                          |
+|-----------------|--------------|-------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| skip            | boolean      | 0.1.0 | Skip plugin execution (don't read/validate any files, don't generate any java types).<br><br>**Default**: `false`                                                                    |
+| url             | java.net.URL | 0.1.0 | Direct link onto [KaiTai universal zip archive](http://kaitai.io/#download).<br><br>**Default**: Detected from version                                                               |
+| version         | String       | 0.1.0 | Version of [KaiTai](http://kaitai.io/#download) library.<br><br>**Default**: `0.10`                                                                                                  |
+| cacheDir        | java.io.File | 0.1.0 | Cache directory for download KaiTai library.<br><br>**Default**: `build/tmp/kaitai-cache`                                                                                            |
+| sourceDirectory | java.io.File | 0.1.0 | Source directory with [Kaitai Struct language](http://formats.kaitai.io/) files.<br><br>**Default**: src/main/resources/kaitai                                                       |
+| includes        | String[]     | 0.1.0 | Include wildcard pattern list.<br><br>**Default**: ["*.ksy"]                                                                                                                         |
+| excludes        | String[]     | 0.1.0 | Exclude wildcard pattern list.<br><br>**Default**: []                                                                                                                                |
+| output          | java.io.File | 0.1.0 | Target directory for generated Java source files.<br><br>**Default**: `build/generated/kaitai`                                                                                       |
+| exactOutput     | Boolean      | 0.1.5 | Move root of packages directory structure exact inside configured output path and remove `src` item. Use only for 0.8 and earlier. Has no effect in 0.9+<br><br>**Default**: `false` |
+| packageName     | String       | 0.1.0 | Target package for generated Java source files.<br><br>**Default**: Trying to get project's group or `kaitai` otherwise                                                              |
+| executionTimeout| Long         | 0.1.3 | Timeout for execution operations.<br><br>**Default**: `5000`                                                                                                                         |
+| fromFileClass   | String       | 0.1.3 | Classname with custom KaitaiStream implementations for static builder `fromFile(...)`                                                                                                |
+| opaqueTypes     | Boolean      | 0.1.3 | Allow use opaque (external) types in ksy. See more in [documentation](http://doc.kaitai.io/user_guide.html#opaque-types).                                                            |
+| noVersionCheck  | Boolean      | 0.1.6 | Allow to disable Java version check. For non-Windows only.<br><br>**Default**: `false`                                                                                               |
+| noAutoRead      | Boolean      | 0.1.7 | Allow to disable auto-running `_read` in constructor <br><br>**Default**: `false`                                                                                                    |
 
 ### Useful commands
 
