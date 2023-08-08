@@ -36,6 +36,8 @@ public class KaitaiGenerator {
 	private Boolean opaqueTypes;
 	private boolean noVersionCheck;
 	private boolean noAutoRead;
+	private boolean readPos;
+	private boolean debug;
 
 	/**
 	 * Build {@code KaitaiGenerator} with preconfigured state.
@@ -274,6 +276,44 @@ public class KaitaiGenerator {
 		return this;
 	}
 
+	public void setReadPos(boolean readPos) {
+		this.readPos = readPos;
+	}
+
+	public boolean isReadPos() {
+		return readPos;
+	}
+
+	/**
+	 * Set readPos mode and return self.
+	 *
+	 * @param readPos new value
+	 * @return self
+	 */
+	public KaitaiGenerator readPos(boolean readPos) {
+		setReadPos(readPos);
+		return this;
+	}
+
+	public void setDebug(boolean debug) {
+		this.debug = debug;
+	}
+
+	public boolean isDebug() {
+		return debug;
+	}
+
+	/**
+	 * Set debug mode and return self.
+	 *
+	 * @param debugMode new value
+	 * @return self
+	 */
+	public KaitaiGenerator debug(boolean debugMode) {
+		setDebug(debugMode);
+		return this;
+	}
+
 
 	private ProcBuilder process(Logger log) {
 		ProcBuilder builder = new ProcBuilder(getKaitai().normalize().toAbsolutePath().toString())
@@ -342,6 +382,12 @@ public class KaitaiGenerator {
 			.withArgs("--java-package", getPackageName());
 		if (isNoAutoRead()) {
 			builder.withArgs("--no-auto-read");
+		}
+		if (isReadPos()) {
+			builder.withArgs("--read-pos");
+		}
+		if (isDebug()) {
+			builder.withArgs("--debug");
 		}
 		if (isNotBlank(getFromFileClass())) {
 			builder.withArgs("--java-from-file-class", getFromFileClass());
