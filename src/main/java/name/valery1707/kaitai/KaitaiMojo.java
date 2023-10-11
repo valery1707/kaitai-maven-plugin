@@ -164,6 +164,12 @@ public class KaitaiMojo extends AbstractMojo {
 	private Boolean noAutoRead;
 
 	/**
+	 * Generate in read-write mode.
+	 */
+	@Parameter(property = "kaitai.readWrite", defaultValue = "false")
+	private Boolean readWrite;
+
+	/**
 	 * Allow to disable Java version check.
 	 *
 	 * @since 0.1.6
@@ -237,6 +243,7 @@ public class KaitaiMojo extends AbstractMojo {
 			.opaqueTypes(opaqueTypes)
 			.noVersionCheck(noVersionCheck)
 			.noAutoRead(noAutoRead)
+			.readWrite(readWrite)
 			.generate(logger);
 
 		//Add generated directory into Maven's build scope
