@@ -3,6 +3,7 @@ Change log for releases.
 # SNAPSHOT
 
 * Migrate Kaitai distribution URL from JFrog Bintray to GitHub releases
+* Allow passing custom arguments to Kaitai compiler
 
 # 0.1.6
 

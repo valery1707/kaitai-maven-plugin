@@ -164,6 +164,14 @@ public class KaitaiMojo extends AbstractMojo {
 	private Boolean noAutoRead;
 
 	/**
+	 * Additional arguments passed to the Kaitai compiler.
+	 *
+	 * @since 0.1.7
+	 */
+	@Parameter(property = "kaitai.compilerArguments")
+	private String[] compilerArguments;
+
+	/**
 	 * Allow to disable Java version check.
 	 *
 	 * @since 0.1.6
@@ -235,6 +243,7 @@ public class KaitaiMojo extends AbstractMojo {
 			.executionTimeout(executionTimeout)
 			.fromFileClass(fromFileClass)
 			.opaqueTypes(opaqueTypes)
+			.compilerArguments(compilerArguments)
 			.noVersionCheck(noVersionCheck)
 			.noAutoRead(noAutoRead)
 			.generate(logger);

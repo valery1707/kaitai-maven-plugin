@@ -64,6 +64,11 @@ public class KaitaiGeneratorTest {
 			.withSource(sources);
 	}
 
+	private Path javaExecutable() {
+		String executable = SystemUtils.IS_OS_WINDOWS ? "java.exe" : "java";
+		return Paths.get(System.getProperty("java.home")).resolve("bin").resolve(executable);
+	}
+
 	@Test
 	public void testGenerate_success() throws IOException, URISyntaxException, KaitaiException {
 		Path source = findIt()
@@ -218,5 +223,20 @@ public class KaitaiGeneratorTest {
 
 			assertThat(generator.getOutput().resolve("scr")).doesNotExist();
 		}
+	}
+
+	@Test
+	public void testOption_compilerArguments() throws IOException, KaitaiException {
+		KaitaiGenerator generator = KaitaiGenerator
+			.generator(
+				javaExecutable(),
+				temporaryFolder.newFolder().toPath(),
+				"name.valery1707.kaitai.test"
+			)
+			.compilerArguments("--custom-flag", "custom-value", " ");
+
+		assertThat(generator.getCompilerArguments())
+			.containsExactly("--custom-flag", "custom-value")
+		;
 	}
 }

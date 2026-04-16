@@ -10,12 +10,14 @@ import org.buildobjects.process.TimeoutException;
 import org.slf4j.Logger;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableSet;
 import static name.valery1707.kaitai.KaitaiUtils.*;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -36,6 +38,7 @@ public class KaitaiGenerator {
 	private Boolean opaqueTypes;
 	private boolean noVersionCheck;
 	private boolean noAutoRead;
+	private final List<String> compilerArguments = new ArrayList<>();
 
 	/**
 	 * Build {@code KaitaiGenerator} with preconfigured state.
@@ -219,6 +222,64 @@ public class KaitaiGenerator {
 	}
 
 	/**
+	 * Get additional arguments for Kaitai compiler.
+	 *
+	 * @return Additional arguments for Kaitai compiler
+	 */
+	public List<String> getCompilerArguments() {
+		return unmodifiableList(compilerArguments);
+	}
+
+	/**
+	 * Set additional arguments for Kaitai compiler.
+	 *
+	 * @param compilerArguments Additional arguments for Kaitai compiler
+	 */
+	public void setCompilerArguments(Iterable<String> compilerArguments) {
+		this.compilerArguments.clear();
+		if (compilerArguments == null) {
+			return;
+		}
+		for (String compilerArgument : compilerArguments) {
+			compilerArgument = trimToNull(compilerArgument);
+			if (compilerArgument != null) {
+				this.compilerArguments.add(compilerArgument);
+			}
+		}
+	}
+
+	/**
+	 * Set additional arguments for Kaitai compiler.
+	 *
+	 * @param compilerArguments Additional arguments for Kaitai compiler
+	 */
+	public void setCompilerArguments(String... compilerArguments) {
+		setCompilerArguments(compilerArguments == null ? null : Arrays.asList(compilerArguments));
+	}
+
+	/**
+	 * Set additional arguments for Kaitai compiler.
+	 *
+	 * @param compilerArguments Additional arguments for Kaitai compiler
+	 * @return self
+	 */
+	public KaitaiGenerator compilerArguments(Iterable<String> compilerArguments) {
+		setCompilerArguments(compilerArguments);
+		return this;
+	}
+
+	/**
+	 * Set additional arguments for Kaitai compiler.
+	 *
+	 * @param compilerArguments Additional arguments for Kaitai compiler
+	 * @return self
+	 */
+	public KaitaiGenerator compilerArguments(String... compilerArguments) {
+		setCompilerArguments(compilerArguments);
+		return this;
+	}
+
+	/**
 	 * Get version check mode.
 	 *
 	 * @return Version check mode
@@ -348,6 +409,9 @@ public class KaitaiGenerator {
 		}
 		if (getOpaqueTypes() != null) {
 			builder.withArgs("--opaque-types", getOpaqueTypes().toString());
+		}
+		for (String compilerArgument : getCompilerArguments()) {
+			builder.withArg(compilerArgument);
 		}
 
 		for (Path source : getSources()) {
